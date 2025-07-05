@@ -22,7 +22,7 @@ export default function Home() {
       <section className="bg-gradient-to-r from-neonPurple/20 to-iceBlue/20 py-8">
         <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <StatItem value="2-Day" label="FAST SHIPPING" />
-          <StatItem value="FREE" label="ORLEANS DELIVERY" />
+          <StatItem value="MADE" label="IN THE US" />
           <StatItem value="100%" label="SATISFACTION" />
           <StatItem value="1,218+" label="SIGNS LIT" neon />
         </div>
