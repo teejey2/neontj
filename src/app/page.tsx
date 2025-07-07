@@ -7,8 +7,18 @@ import Hero from './components/Hero';
 import Counter from './components/Counter';
 
 const galleryImages = [
-  { id: 1, src: '/images/gallery/gallery1.jpg', alt: 'Neon Sign Example 1' },
-  { id: 2, src: '/images/gallery/gallery2.jpg', alt: 'Neon Sign Example 2' },
+  { id: 1, src: '/images/gallery/gallery1.jpg', alt: 'Custom Neon Bar Sign' },
+  { id: 2, src: '/images/gallery/gallery2.jpg', alt: 'Personalized Name Neon' },
+  { id: 3, src: '/images/gallery/gallery3.jpg', alt: 'LED Business Sign' },
+  { id: 4, src: '/images/gallery/gallery4.jpg', alt: 'Home Decor Neon' },
+  { id: 5, src: '/images/gallery/gallery5.jpg', alt: 'Wedding Neon Art' },
+  { id: 6, src: '/images/gallery/gallery6.jpg', alt: 'Music Themed Sign' },
+  { id: 7, src: '/images/gallery/gallery7.jpg', alt: 'Sports Team Neon' },
+  { id: 8, src: '/images/gallery/gallery8.jpg', alt: 'Quotation Sign' },
+  { id: 9, src: '/images/gallery/gallery9.jpg', alt: 'Logo Design' },
+  { id: 10, src: '/images/gallery/gallery10.jpg', alt: 'Custom Shape' },
+  { id: 11, src: '/images/gallery/gallery11.jpg', alt: 'Special Event Sign' },
+  { id: 12, src: '/images/gallery/gallery12.jpg', alt: 'Large Wall Piece' },
 ];
 
 export default function Home() {
@@ -33,7 +43,9 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl font-heading mb-4">
             <span className="neon-text">Recent</span> Creations
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          
+          {/* Updated gallery grid with more columns */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {galleryImages.map((image) => (
               <GalleryItem key={image.id} src={image.src} alt={image.alt} />
             ))}
@@ -69,15 +81,15 @@ function StatItem({ value, label, neon = false }: { value: string, label: string
 function GalleryItem({ src, alt }: { src: string; alt: string }) {
   return (
     <motion.div 
-      className="aspect-square bg-bgBlack border border-neonPurple/30 rounded-lg overflow-hidden neon-glow"
-      whileHover={{ scale: 1.02 }}
+      className="relative aspect-square bg-bgBlack border border-neonPurple/30 rounded-lg overflow-hidden neon-glow"
+      whileHover={{ scale: 1.05 }}
     >
       <Image
         src={src}
         alt={alt}
-        width={600}
-        height={600}
-        className="w-full h-full object-cover"
+        fill
+        className="object-cover hover:scale-110 transition-transform duration-300"
+        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
       />
     </motion.div>
   );
