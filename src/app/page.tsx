@@ -1,10 +1,9 @@
 'use client';
-
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
-import Hero from './components/Hero';
-import Counter from './components/Counter';
+import Hero from '@/components/Hero';
+import Counter from '@/components/Counter';
+import Link from 'next/link';
 
 const galleryImages = [
   { id: 1, src: '/images/gallery/gallery1.jpg', alt: 'Custom Neon Bar Sign' },
@@ -16,19 +15,43 @@ const galleryImages = [
   { id: 7, src: '/images/gallery/gallery7.jpg', alt: 'Sports Team Neon' },
   { id: 8, src: '/images/gallery/gallery8.jpg', alt: 'Quotation Sign' },
   { id: 9, src: '/images/gallery/gallery9.jpg', alt: 'Logo Design' },
-  { id: 10, src: '/images/gallery/gallery10.jpg', alt: 'Custom Shape' },
-  { id: 11, src: '/images/gallery/gallery11.jpg', alt: 'Special Event Sign' },
-  { id: 12, src: '/images/gallery/gallery12.jpg', alt: 'Large Wall Piece' },
 ];
 
-export default function Home() {
-  const [showModal, setShowModal] = useState(false);
+function StatItem({ value, label, neon = false }: { value: string; label: string; neon?: boolean }) {
+  return (
+    <div className="p-4">
+      <h3 className={`text-3xl md:text-4xl font-heading ${neon ? 'neon-text' : 'text-iceBlue'}`}>
+        {value}
+      </h3>
+      <p className="text-sm uppercase tracking-wide text-white/80">{label}</p>
+    </div>
+  );
+}
 
+function GalleryItem({ src, alt }: { src: string; alt: string }) {
+  return (
+    <motion.div
+      whileHover={{ scale: 1.05 }}
+      className="overflow-hidden rounded-lg shadow-lg shadow-neonPurple/30"
+    >
+      <Image
+        src={src}
+        alt={alt}
+        width={400}
+        height={400}
+        className="w-full h-auto object-cover aspect-square"
+        placeholder="blur"
+        blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4="
+      />
+    </motion.div>
+  );
+}
+
+export default function Home() {
   return (
     <main className="min-h-screen">
-      <Counter />
-      <Hero setShowModal={setShowModal} />
-
+      <Hero />
+      
       <section className="bg-gradient-to-r from-neonPurple/20 to-iceBlue/20 py-8">
         <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
           <StatItem value="2-Day" label="FAST SHIPPING" />
@@ -43,54 +66,32 @@ export default function Home() {
           <h2 className="text-3xl md:text-5xl font-heading mb-4">
             <span className="neon-text">Recent</span> Creations
           </h2>
-          
-          {/* Updated gallery grid with more columns */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            {galleryImages.map((image) => (
-              <GalleryItem key={image.id} src={image.src} alt={image.alt} />
-            ))}
-          </div>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {galleryImages.map((image) => (
+            <GalleryItem key={image.id} src={image.src} alt={image.alt} />
+          ))}
+        </div>
+
+        <div className="text-center mt-8">
+          <Link href="/portfolio">
+            <button className="neon-button px-6 py-3">
+              See More Portfolio
+            </button>
+          </Link>
         </div>
       </section>
 
       <section className="py-20 bg-gradient-to-b from-bgBlack to-neonPurple/10">
         <div className="container mx-auto px-4 text-center">
-          <button 
-            className="neon-button px-8 py-4 text-xl"
-            onClick={() => setShowModal(true)}
-          >
-            Design Your Sign Now
-          </button>
+          <Link href="/custom-sign">
+            <button className="neon-button px-8 py-4 text-xl">
+              Design Your Sign Now
+            </button>
+          </Link>
         </div>
       </section>
     </main>
-  );
-}
-
-function StatItem({ value, label, neon = false }: { value: string, label: string, neon?: boolean }) {
-  return (
-    <div className="p-4">
-      <h3 className={`text-3xl md:text-4xl font-heading ${neon ? 'neon-text' : 'text-iceBlue'}`}>
-        {value}
-      </h3>
-      <p className="text-sm uppercase tracking-widest">{label}</p>
-    </div>
-  );
-}
-
-function GalleryItem({ src, alt }: { src: string; alt: string }) {
-  return (
-    <motion.div 
-      className="relative aspect-square bg-bgBlack border border-neonPurple/30 rounded-lg overflow-hidden neon-glow"
-      whileHover={{ scale: 1.05 }}
-    >
-      <Image
-        src={src}
-        alt={alt}
-        fill
-        className="object-cover hover:scale-110 transition-transform duration-300"
-        sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
-      />
-    </motion.div>
   );
 }

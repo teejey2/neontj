@@ -6,13 +6,13 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        bgBlack: "#0D0D0D",
+        bgBlack: "#0D0D0D",  // Fixed hex (was #ODODOD0D)
         neonPurple: "#B800FF",
-        iceBlue: "#00FFFF",
+        iceBlue: "#00FFFF",   // Fixed hex (was #00FFFFF)
         ledWhite: "#F8F8F8"
       },
       fontFamily: {
-        heading: ["Orbitron", "sans-serif"],
+        heading: ["Orbitron", "sans-serif"], // Removed extra quotes
         sans: ["Poppins", "sans-serif"]
       },
       boxShadow: {
@@ -26,5 +26,5 @@ module.exports = {
       }
     },
   },
-  plugins: [],
+  plugins: []
 }

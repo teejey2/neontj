@@ -13,13 +13,4 @@ declare module '@/app/components/Counter' {
   export default Counter;
 }
 
-declare module '@/data/signs' {
-  interface SignImage {
-    id: number;
-    src: string;
-    alt: string;
-    category?: string;
-  }
-  export const signImages: SignImage[];
-  export const galleryImages: SignImage[];
-}
+// Remove the duplicate declaration for galleryImages
