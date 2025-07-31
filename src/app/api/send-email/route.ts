@@ -1,23 +1,12 @@
+// src/app/api/send-email/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { SESClient, SendEmailCommand } from '@aws-sdk/client-ses';
 import { z } from 'zod';
 
-// Validate environment variables
-const region = process.env.AWS_REGION;
-const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
-const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+// we’ll initialize this only once at runtime
+let sesClient: SESClient | null = null;
 
-if (!region || !accessKeyId || !secretAccessKey) {
-  console.error('AWS credentials are missing');
-  throw new Error('AWS credentials not configured');
-}
-
-const sesClient = new SESClient({
-  region,
-  credentials: { accessKeyId, secretAccessKey },
-});
-
-// Validation schema
+// your Zod validation schema
 const EmailSchema = z.object({
   line1: z.string().min(1).max(50),
   line2: z.string().max(50).optional(),
@@ -32,21 +21,41 @@ const EmailSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // 1️⃣ Only now do we check for AWS env vars (won’t throw at build time)
+  const region      = process.env.AWS_REGION;
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+  const secretKey   = process.env.AWS_SECRET_ACCESS_KEY;
+
+  if (!region || !accessKeyId || !secretKey) {
+    console.error('AWS credentials not configured');
+    return NextResponse.json(
+      { error: 'AWS credentials not configured' },
+      { status: 500 }
+    );
+  }
+
+  // 2️⃣ Lazy-init SES client
+  if (!sesClient) {
+    sesClient = new SESClient({
+      region,
+      credentials: { accessKeyId, secretAccessKey: secretKey },
+    });
+  }
+
   try {
+    // 3️⃣ Parse & validate incoming JSON
     const data = await request.json();
-    
-    // Validate input
     const validation = EmailSchema.safeParse(data);
+
     if (!validation.success) {
       return NextResponse.json(
         { error: 'Invalid data', details: validation.error },
         { status: 400 }
       );
     }
-
     const validData = validation.data;
-    
-    // Create email content
+
+    // 4️⃣ Build HTML email body
     const htmlContent = `
       <h1>New Custom Sign Quote Request</h1>
       <h2>Design Details</h2>
@@ -63,45 +72,37 @@ export async function POST(request: NextRequest) {
       <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
     `;
 
+    // 5️⃣ Prepare & send SES command
     const params = {
       Source: 'info@itsmeteejey.com',
       Destination: { ToAddresses: ['internetmoneyiri@gmail.com'] },
       Message: {
-        Subject: { 
-          Data: `New Neon Sign Quote - ${new Date().toLocaleDateString()}`
+        Subject: {
+          Data: `New Neon Sign Quote - ${new Date().toLocaleDateString()}`,
         },
         Body: {
-          Html: { 
-            Data: htmlContent
-          }
-        }
-      }
-    };
-
-    const command = new SendEmailCommand(params);
-    await sesClient.send(command);
-
-    return NextResponse.json({
-      success: true,
-      message: 'Quote request submitted successfully'
-    });
-
-  } catch (error: any) {
-    console.error('SES Error:', error);
-    
-    let errorMessage = 'Failed to send email';
-    if (error.name === 'InvalidParameterValue') {
-      errorMessage = 'Invalid email address';
-    } else if (error.name === 'AccessDeniedException') {
-      errorMessage = 'AWS access denied - check permissions';
-    }
-
-    return NextResponse.json(
-      {
-        error: errorMessage,
-        details: error.message,
-        code: error.name
+          Html: { Data: htmlContent },
+        },
       },
+    };
+    await sesClient.send(new SendEmailCommand(params));
+
+    // 6️⃣ Return success
+    return NextResponse.json(
+      { success: true, message: 'Quote request submitted successfully' },
+      { status: 200 }
+    );
+
+  } catch (err: any) {
+    console.error('SES Error:', err);
+    const errorMessage =
+      err.name === 'InvalidParameterValue'
+        ? 'Invalid email address'
+        : err.name === 'AccessDeniedException'
+        ? 'AWS access denied – check permissions'
+        : 'Failed to send email';
+    return NextResponse.json(
+      { error: errorMessage, details: err.message, code: err.name },
       { status: 500 }
     );
   }
