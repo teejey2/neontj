@@ -44,7 +44,7 @@ export default function CustomSignSelection() {
             >
               <h2 className="text-2xl font-heading text-iceBlue mb-4">Logo/Image Upload</h2>
               <p className="text-center mb-6">
-                Upload your logo or design. We'll create a custom quote and contact you.
+                Upload your logo or design. We&apos;ll create a custom quote and contact you.
               </p>
               <div className="mt-auto">
                 <button className="neon-button px-6 py-3">Upload Design</button>

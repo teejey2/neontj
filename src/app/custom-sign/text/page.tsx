@@ -270,7 +270,7 @@ export default function CustomSignPage() {
                 ) : 'Get Quote'}
               </button>
               <p className="mt-4 text-sm text-iceBlue">
-                We'll email you within 24 hours to finalize your design
+                We&apos;ll email you within 24 hours to finalize your design
               </p>
             </div>
           </div>

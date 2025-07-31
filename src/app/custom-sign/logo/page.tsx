@@ -67,7 +67,7 @@ export default function LogoUploadPage() {
             Custom Logo/Image Neon Sign
           </h1>
           <p className="text-center text-xl text-iceBlue mb-12">
-            Upload your design and we'll create a custom quote for you
+            Upload your design and we&apos;ll create a custom quote for you
           </p>
 
           <ErrorBoundary fallback={<div className="text-red-500 p-4">Form failed to load</div>}>

@@ -14,6 +14,12 @@ interface PreviewCanvasProps {
 }
 
 export default function PreviewCanvas({ config }: PreviewCanvasProps) {
+  // Add glow effect based on color
+  const textGlow = {
+    filter: `drop-shadow(0 0 5px ${config.color}) 
+             drop-shadow(0 0 15px ${config.color}80)`,
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px]">
       <div 
@@ -40,8 +46,8 @@ export default function PreviewCanvas({ config }: PreviewCanvasProps) {
               style={{
                 fontFamily: config.font,
                 color: config.color,
-                textShadow: `0 0 10px ${config.color}, 0 0 20px ${config.color}80`,
-                fontSize: '4rem'
+                fontSize: '4rem',
+                ...textGlow
               }}
             >
               {config.line1 || 'LINE 1'}
@@ -61,8 +67,8 @@ export default function PreviewCanvas({ config }: PreviewCanvasProps) {
                 style={{
                   fontFamily: config.font,
                   color: config.color,
-                  textShadow: `0 0 10px ${config.color}, 0 0 20px ${config.color}80`,
-                  fontSize: '4rem'
+                  fontSize: '4rem',
+                  ...textGlow
                 }}
               >
                 {config.line2 || 'LINE 2'}
