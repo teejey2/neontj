@@ -5,18 +5,101 @@ export interface SignImage {
   category?: string;
 }
 
-// This is only used in the gallery component
 export const galleryImages: SignImage[] = [
-  { id: 1, src: "/images/gallery/gallery1.jpg", alt: "Custom Neon Bar Sign" },
-  { id: 2, src: "/images/gallery/gallery2.jpg", alt: "Personalized Name Neon" },
-  { id: 3, src: "/images/gallery/gallery3.jpg", alt: "LED Business Sign" },
-  { id: 4, src: "/images/gallery/gallery4.jpg", alt: "Home Decor Neon" },
-  { id: 5, src: "/images/gallery/gallery5.jpg", alt: "Wedding Neon Art" },
-  { id: 6, src: "/images/gallery/gallery6.jpg", alt: "Music Themed Sign" },
-  { id: 7, src: "/images/gallery/gallery7.jpg", alt: "Sports Team Neon" },
-  { id: 8, src: "/images/gallery/gallery8.jpg", alt: "Quotation Sign" },
-  { id: 9, src: "/images/gallery/gallery9.jpg", alt: "Logo Design" },
-  { id: 10, src: "/images/gallery/gallery10.jpg", alt: "Custom Shape" },
-  { id: 11, src: "/images/gallery/gallery11.jpg", alt: "Special Event Sign" },
-  { id: 12, src: "/images/gallery/gallery12.jpg", alt: "Large Wall Piece" },
+  { 
+    id: 1, 
+    src: "/images/portfolio/bar-sign.jpg", 
+    alt: "Custom Neon Bar Sign", 
+    category: "Business" 
+  },
+  { 
+    id: 2, 
+    src: "/images/portfolio/name-sign.jpg", 
+    alt: "Personalized Name Neon", 
+    category: "Personal" 
+  },
+  { 
+    id: 3, 
+    src: "/images/portfolio/restaurant-sign.jpg", 
+    alt: "LED Restaurant Sign", 
+    category: "Business" 
+  },
+  { 
+    id: 4, 
+    src: "/images/portfolio/home-decor.jpg", 
+    alt: "Home Decor Neon", 
+    category: "Home" 
+  },
+  { 
+    id: 5, 
+    src: "/images/portfolio/wedding-sign.jpg", 
+    alt: "Wedding Neon Art", 
+    category: "Events" 
+  },
+  { 
+    id: 6, 
+    src: "/images/portfolio/music-sign.jpg", 
+    alt: "Music Themed Sign", 
+    category: "Entertainment" 
+  },
+  { 
+    id: 7, 
+    src: "/images/portfolio/sports-sign.jpg", 
+    alt: "Sports Team Neon", 
+    category: "Sports" 
+  },
+  { 
+    id: 8, 
+    src: "/images/portfolio/quote-sign.jpg", 
+    alt: "Inspirational Quote Sign", 
+    category: "Home" 
+  },
+  { 
+    id: 9, 
+    src: "/images/portfolio/logo-design.jpg", 
+    alt: "Business Logo Design", 
+    category: "Business" 
+  },
+  { 
+    id: 10, 
+    src: "/images/portfolio/custom-shape.jpg", 
+    alt: "Custom Shape Neon", 
+    category: "Art" 
+  },
+  { 
+    id: 11, 
+    src: "/images/portfolio/event-sign.jpg", 
+    alt: "Special Event Sign", 
+    category: "Events" 
+  },
+  { 
+    id: 12, 
+    src: "/images/portfolio/large-wall.jpg", 
+    alt: "Large Wall Piece", 
+    category: "Commercial" 
+  },
+  { 
+    id: 13, 
+    src: "/images/portfolio/retro-sign.jpg", 
+    alt: "Retro Style Sign", 
+    category: "Vintage" 
+  },
+  { 
+    id: 14, 
+    src: "/images/portfolio/minimalist.jpg", 
+    alt: "Minimalist Design", 
+    category: "Home" 
+  },
+  { 
+    id: 15, 
+    src: "/images/portfolio/colorful-design.jpg", 
+    alt: "Colorful Neon Art", 
+    category: "Art" 
+  },
+  { 
+    id: 16, 
+    src: "/images/portfolio/outdoor-sign.jpg", 
+    alt: "Weatherproof Outdoor Sign", 
+    category: "Commercial" 
+  },
 ];

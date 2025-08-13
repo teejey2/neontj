@@ -1,19 +1,31 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { EnhancedSignImage } from '@/lib/gallery';
+import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Gallery({ initialImages }: { initialImages: EnhancedSignImage[] }) {
-  const [loading, setLoading] = useState(false);
-  const [visibleImages, setVisibleImages] = useState(12);
+interface EnhancedSignImage {
+  id: number;
+  src: string;
+  alt: string;
+  blurDataURL: string;
+}
+
+interface GalleryProps {
+  initialImages: EnhancedSignImage[];
+}
+
+export default function Gallery({ initialImages }: GalleryProps) {
   const [images] = useState<EnhancedSignImage[]>(initialImages);
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
 
-  const loadMore = () => {
-    setLoading(true);
+  const loadMoreImages = () => {
+    setIsLoading(true);
     setTimeout(() => {
-      setVisibleImages(prev => Math.min(prev + 12, images.length));
-      setLoading(false);
+      setVisibleCount(prev => Math.min(prev + 12, images.length));
+      setIsLoading(false);
     }, 800);
   };
 
@@ -21,7 +33,7 @@ export default function Gallery({ initialImages }: { initialImages: EnhancedSign
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    "itemListElement": images.slice(0, visibleImages).map((image, index) => ({
+    "itemListElement": images.slice(0, visibleCount).map((image, index) => ({
       "@type": "ListItem",
       "position": index + 1,
       "item": {
@@ -34,57 +46,91 @@ export default function Gallery({ initialImages }: { initialImages: EnhancedSign
   };
 
   return (
-    <main className="py-20">
+    <main className="py-12 px-4 bg-bgBlack">
       <script 
         type="application/ld+json" 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
       />
       
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-heading mb-4">
+          <motion.h1
+            className="text-4xl md:text-6xl font-heading mb-4"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
             <span className="neon-text">Our</span> Portfolio
-          </h1>
-          <p className="text-xl text-iceBlue max-w-2xl mx-auto">
-            Browse through our collection of custom neon signs created for clients worldwide
-          </p>
+          </motion.h1>
+          <motion.p
+            className="text-xl text-iceBlue max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            Browse our collection of custom neon signs created for clients worldwide
+          </motion.p>
         </div>
 
+        {/* Gallery Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {images.slice(0, visibleImages).map((image) => (
-            <div 
-              key={image.id} 
-              className="bg-bgBlack/50 border border-neonPurple/30 rounded-xl overflow-hidden transition-all hover:shadow-neon group"
+          {images.slice(0, visibleCount).map((image) => (
+            <motion.div
+              key={image.id}
+              className="relative group bg-bgBlack/50 border border-neonPurple/30 rounded-xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              whileHover={{ y: -5 }}
+              onHoverStart={() => setHoveredId(image.id)}
+              onHoverEnd={() => setHoveredId(null)}
             >
-              <div className="relative h-64 overflow-hidden">
+              <div className="relative aspect-square overflow-hidden">
                 <Image
                   src={image.src}
                   alt={image.alt}
                   fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, 
+                         (max-width: 1024px) 50vw, 
+                         33vw"
                   placeholder="blur"
                   blurDataURL={image.blurDataURL}
+                  priority={image.id < 5}
                 />
+                
+                <AnimatePresence>
+                  {hoveredId === image.id && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <h3 className="text-white text-lg font-bold">
+                        {image.alt}
+                      </h3>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
-              <div className="p-4">
-                <p className="text-ledWhite font-medium group-hover:text-iceBlue transition-colors">
-                  {image.alt}
-                </p>
-              </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        {visibleImages < images.length && (
+        {/* Load More Button */}
+        {visibleCount < images.length && (
           <div className="mt-12 text-center">
-            <button
-              onClick={loadMore}
-              disabled={loading}
+            <motion.button
               className="neon-button px-8 py-4 text-xl min-w-[200px]"
-              aria-label="Load more portfolio items"
+              onClick={loadMoreImages}
+              disabled={isLoading}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              {loading ? (
+              {isLoading ? (
                 <div className="flex items-center justify-center">
                   <svg className="animate-spin h-5 w-5 mr-3 text-current" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
@@ -93,20 +139,36 @@ export default function Gallery({ initialImages }: { initialImages: EnhancedSign
                   Loading...
                 </div>
               ) : 'Load More'}
-            </button>
+            </motion.button>
           </div>
         )}
 
-        <div className="mt-12 text-center">
+        {/* CTA Section */}
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="mb-6">
+            <h2 className="text-3xl font-heading neon-text mb-4">
+              Ready to Create Your Own?
+            </h2>
+            <p className="text-xl text-iceBlue max-w-2xl mx-auto">
+              Design a custom neon sign that perfectly matches your style
+            </p>
+          </div>
+          
           <Link href="/custom-sign">
-            <button 
+            <motion.button
               className="neon-button px-8 py-4 text-xl"
-              aria-label="Create your custom neon sign"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              Create Your Custom Sign
-            </button>
+              Design Your Custom Sign
+            </motion.button>
           </Link>
-        </div>
+        </motion.div>
       </div>
     </main>
   );
