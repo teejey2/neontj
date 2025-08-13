@@ -1,30 +1,30 @@
-/** @type {import('tailwindcss').Config} */
+// 0) tailwind.config.js
+// ================================
 module.exports = {
-  content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
-  ],
+  content: ["./src/**/*.{js,ts,jsx,tsx,mdx}"],
   theme: {
     extend: {
       colors: {
-        bgBlack: "#0D0D0D",  // Fixed hex (was #ODODOD0D)
-        neonPurple: "#B800FF",
-        iceBlue: "#00FFFF",   // Fixed hex (was #00FFFFF)
-        ledWhite: "#F8F8F8"
-      },
-      fontFamily: {
-        heading: ["Orbitron", "sans-serif"], // Removed extra quotes
-        sans: ["Poppins", "sans-serif"]
+        neon: {
+          mint: "#B2FFF2",
+          pink: "#FF6AD5",
+          ice: "#7DF9FF",
+          white: "#FFFFFF",
+          yellow: "#FFE66D",
+          orange: "#FFB254",
+          purple: "#C084FC",
+          blue: "#60A5FA",
+          green: "#86EFAC",
+          red: "#FCA5A5",
+        },
       },
       boxShadow: {
-        neon: "0 0 8px rgba(184,0,255,0.7), 0 0 16px rgba(0,255,255,0.5)",
+        glow: "0 0 24px rgba(255,255,255,0.25)",
       },
-      dropShadow: {
-        neon: [
-          "0 0 8px rgba(184,0,255,0.7)",
-          "0 0 16px rgba(0,255,255,0.5)"
-        ],
-      }
+      fontFamily: {
+        sans: ["var(--font-sans)", "system-ui", "Arial"],
+      },
     },
   },
-  plugins: []
-}
+  plugins: [],
+};

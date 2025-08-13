@@ -1,59 +1,40 @@
+/* globals.css — NeonTJ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --neon-glow-purple: 0 0 8px rgba(184, 0, 255, 0.7), 0 0 16px rgba(184, 0, 255, 0.4);
-    --neon-glow-blue: 0 0 8px rgba(0, 255, 255, 0.7), 0 0 16px rgba(0, 255, 255, 0.4);
+    --bg: #0b0b0f;
+    color-scheme: dark;
   }
 
-  body {
-    @apply bg-bgBlack text-ledWhite font-sans antialiased;
-    text-rendering: optimizeLegibility;
+  html, body {
+    background: var(--bg);
+    color: #fff;
   }
 
-  ::selection {
-    @apply bg-neonPurple/30 text-iceBlue;
-  }
-}
-
-@layer components {
-  .neon-text {
-    @apply text-neonPurple;
-    text-shadow: var(--neon-glow-purple);
-    transition: text-shadow 0.3s ease;
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
   }
 
-  .neon-button {
-    @apply relative px-6 py-3 rounded-full bg-bgBlack border-2 border-neonPurple
-      text-neonPurple font-heading font-bold tracking-wider uppercase 
-      transition-all duration-300 overflow-hidden z-0;
-    box-shadow: var(--neon-glow-purple);
+  /* Accessible focus ring with neon vibe */
+  :focus-visible {
+    outline: 2px solid #c084fc; /* violet-400 */
+    outline-offset: 2px;
   }
 
-  .neon-button:hover {
-    @apply bg-neonPurple text-bgBlack scale-105;
-    box-shadow: var(--neon-glow-purple), 0 0 24px rgba(184, 0, 255, 0.6);
+  /* Hide number input spinners (cross-browser) */
+  input[type="number"] {
+    appearance: textfield;       /* standard */
+    -moz-appearance: textfield;  /* Firefox */
   }
-}
 
-@layer utilities {
-  .shadow-neon {
-    box-shadow: var(--neon-glow-purple);
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;            /* standard (no-op for pseudo, silences linter) */
+    -webkit-appearance: none;    /* WebKit */
+    margin: 0;
   }
-  
-  /* Add smooth transitions for color changes */
-  .color-transition {
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease;
-  }
-}
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-
-@font-face {
-  font-family: 'Monoton';
-  src: url('/fonts/Monoton-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
 }

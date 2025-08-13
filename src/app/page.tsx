@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Hero from '@/components/Hero';
 import Counter from '@/components/Counter';
 import Link from 'next/link';
+import Testimonials from '@/components/Testimonials';
 
 const galleryImages = [
   { id: 1, src: '/images/gallery/gallery1.jpg', alt: 'Custom Neon Bar Sign' },
@@ -82,6 +83,8 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      <Testimonials />
 
       <section className="py-20 bg-gradient-to-b from-bgBlack to-neonPurple/10">
         <div className="container mx-auto px-4 text-center">
