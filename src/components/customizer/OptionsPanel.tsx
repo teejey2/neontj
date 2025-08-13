@@ -88,8 +88,8 @@ export function OptionsPanel(props: PanelProps) {
             return (
               <button key={id} onClick={() => props.setSizeId(id)} className={`rounded-xl border p-3 text-left ${isActive ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"}`} aria-pressed={isActive}>
                 <div className="text-sm font-semibold text-white">{s.label}</div>
-                <div className="text-xs text-white/60">Length: {s.widthIn}"</div>
-                <div className="text-xs text-white/60">Height: {s.heightIn}"</div>
+                <div className="text-xs text-white/60">Length: {s.widthIn}&quot;</div>
+                <div className="text-xs text-white/60">Height: {s.heightIn}&quot;</div>
               </button>
             );
           })}
