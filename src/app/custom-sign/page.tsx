@@ -29,7 +29,7 @@ export default function CustomSignPage() {
         return next;
       });
     }
-  }, [flat.length, singleColor]);
+  }, [flat.length, singleColor, perLetter.length]);
 
   const payload = {
     text,
