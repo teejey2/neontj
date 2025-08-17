@@ -1,30 +1,35 @@
+// tailwind.config.js
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
   ],
   theme: {
     extend: {
       colors: {
-        bgBlack: "#0D0D0D",  // Fixed hex (was #ODODOD0D)
-        neonPurple: "#B800FF",
-        iceBlue: "#00FFFF",   // Fixed hex (was #00FFFFF)
-        ledWhite: "#F8F8F8"
+        bgBlack: "#0b0b0f", // used by bg-bgBlack
+        neon: {
+          purple: "#9b5cff",
+          pink: "#ff4bd1",
+          blue: "#3fd5ff",
+          ice: "#b7e9ff", // optional alias for iceBlue
+        },
       },
       fontFamily: {
-        heading: ["Orbitron", "sans-serif"], // Removed extra quotes
-        sans: ["Poppins", "sans-serif"]
+        // define a heading alias since code uses font-heading
+        heading: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
+        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
       },
       boxShadow: {
-        neon: "0 0 8px rgba(184,0,255,0.7), 0 0 16px rgba(0,255,255,0.5)",
+        // soft neon outer glow used as shadow-glow
+        glow: "0 0 12px rgba(155,92,255,0.45), 0 0 30px rgba(63,213,255,0.25)",
       },
       dropShadow: {
-        neon: [
-          "0 0 8px rgba(184,0,255,0.7)",
-          "0 0 16px rgba(0,255,255,0.5)"
-        ],
-      }
+        neon: "0 0 8px rgba(155,92,255,0.65)",
+      },
     },
   },
-  plugins: []
+  plugins: [],
 }

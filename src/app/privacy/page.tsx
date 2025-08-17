@@ -1,5 +1,5 @@
 export const metadata = {
-  title: 'Privacy Policy – NeonTJ',
+  title: 'Privacy Policy — NeonTJ',
   description: 'How NeonTJ collects and uses data for our custom neon sign service.',
 };
 
@@ -61,7 +61,7 @@ export default function PrivacyPage() {
           <li>Request deletion of your personal data</li>
           <li>Opt-out of marketing communications</li>
         </ul>
-        <p>To exercise these rights, contact us at <a href="mailto:privacy@neontj.com" className="text-iceBlue">privacy@neontj.com</a>.</p>
+        <p>To exercise these rights, contact us at <a href="mailto:privacy@neontj.com" className="text-neon-ice">privacy@neontj.com</a>.</p>
       </section>
 
       <section>
@@ -85,7 +85,7 @@ export default function PrivacyPage() {
         <p>Questions about this policy? Contact us at:</p>
         <address className="not-italic mt-2">
           NeonTJ Privacy Officer<br />
-          <a href="mailto:privacy@neontj.com" className="text-iceBlue">privacy@neontj.com</a><br />
+          <a href="mailto:privacy@neontj.com" className="text-neon-ice">privacy@neontj.com</a><br />
           123 Neon Street, New Orleans, LA 70115
         </address>
       </section>

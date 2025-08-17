@@ -1,15 +1,11 @@
+// src/components/Hero.tsx
 'use client';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 
-interface SignImage {
-  id: number;
-  src: string;
-  alt: string;
-}
-
+interface SignImage { id: number; src: string; alt: string; }
 const demoSigns: SignImage[] = [
   { id: 1, src: '/images/signs/sign1.jpg', alt: 'Custom Neon Sign' },
   { id: 2, src: '/images/signs/sign2.jpg', alt: 'LED Neon Art' },
@@ -27,10 +23,7 @@ export default function Hero() {
             key={sign.id}
             className="relative bg-bgBlack overflow-hidden rounded-lg"
             initial={{ scale: 1 }}
-            animate={{
-              scale: hoveredId === sign.id ? 1.05 : 1,
-              zIndex: hoveredId === sign.id ? 10 : 1,
-            }}
+            animate={{ scale: hoveredId === sign.id ? 1.05 : 1, zIndex: hoveredId === sign.id ? 10 : 1 }}
             transition={{ type: 'spring', stiffness: 300 }}
             onHoverStart={() => setHoveredId(sign.id)}
             onHoverEnd={() => setHoveredId(null)}
@@ -56,10 +49,10 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          NEON<span className="text-iceBlue">TJ</span>
+          NEON<span className="text-neon-ice">TJ</span>
         </motion.h1>
 
-        <Link href="/custom-sign" className="focus:outline-none focus:ring-2 focus:ring-iceBlue rounded-full">
+        <Link href="/custom-sign" className="focus:outline-none focus:ring-2 focus:ring-neon-ice rounded-full">
           <motion.button
             className="neon-button"
             initial={{ opacity: 0, y: 20 }}

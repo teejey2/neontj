@@ -4,47 +4,51 @@ import { motion } from 'framer-motion';
 
 export default function Counter() {
   const [count, setCount] = useState(1218);
-  const [isClient, setIsClient] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
-    setIsClient(true);
-    if (typeof window !== 'undefined') {
-      const savedCount = localStorage.getItem('neonSignCount');
-      const initialCount = savedCount ? parseInt(savedCount, 10) : 1218;
-      setCount(initialCount);
+    const savedCount = localStorage.getItem('neonSignCount');
+    const initialCount = savedCount ? parseInt(savedCount, 10) : 1218;
+    setCount(initialCount);
+    
+    // Only show after 2 seconds delay
+    const timer = setTimeout(() => setIsVisible(true), 2000);
+    
+    const interval = setInterval(() => {
+      setCount(prev => {
+        const newCount = prev + 1;
+        localStorage.setItem('neonSignCount', newCount.toString());
+        return newCount;
+      });
+    }, 1000 * 60 * 60 * 24); // Daily update
 
-      const interval = setInterval(() => {
-        setCount(prev => {
-          const newCount = prev + 1;
-          localStorage.setItem('neonSignCount', newCount.toString());
-          return newCount;
-        });
-      }, 1000 * 60 * 60 * 24); // Update daily
-
-      return () => clearInterval(interval);
-    }
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
   }, []);
 
-  // Don't render anything on the server
-  if (!isClient) return null;
+  if (!isVisible) return null;
 
   return (
     <motion.div
-      className="fixed top-4 right-4 z-50 bg-bgBlack/80 backdrop-blur-sm px-4 py-2 rounded-full border border-neonPurple shadow-neon"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
-      <div className="flex items-center gap-2">
+      className="fixed bottom-4 left-4 z-50 bg-bgBlack/80 backdrop-blur-sm px-3 py-1 rounded-full border border-neon-purple shadow-glow flex items-center"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0 }}
+      whileHover={{ scale: 1.05 }}
+    > 
+      <div className="flex items-center gap-1">
         <motion.span
-          className="text-neonPurple font-heading text-xl font-bold"
+          className="text-neon-purple font-heading text-sm font-bold"
           key={count}
-          initial={{ opacity: 0, y: 10 }}
+          initial={{ opacity: 0, y: 5 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
+          transition={{ duration: 0.3 }}
+        > 
           {count.toLocaleString()}+
         </motion.span>
-        <span className="text-sm">signs lit</span>
+        <span className="text-xs text-neon-ice/80">signs lit</span>
       </div>
     </motion.div>
   );

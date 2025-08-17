@@ -1,84 +1,55 @@
-interface BackboardOptionsProps {
-  selectedStyle: string;
-  selectedColor: string;
-  onStyleSelect: (style: string) => void;
-  onColorSelect: (color: string) => void;
-}
+// 7) src/components/customizer/BackboardOptions.tsx
+// ================================
+"use client";
+import React from "react";
+import type { BackboardStyle, BackboardColor } from "@/lib/pricing";
 
-export default function BackboardOptions({
-  selectedStyle,
-  selectedColor,
-  onStyleSelect,
-  onColorSelect
-}: BackboardOptionsProps) {
-  const styles = [
-    { id: 'cut-to-letter', label: 'Cut to Letter', popular: true },
-    { id: 'rectangle', label: 'Rectangle', popular: false },
-    { id: 'cut-to-shape', label: 'Cut to Shape', popular: false },
-    { id: 'fine-cut', label: 'Fine Cut', popular: true },
-    { id: 'none', label: 'No Backboard', popular: false },
-  ];
-
-  const colors = [
-    { id: 'clear', label: 'Clear', popular: true },
-    { id: 'black', label: 'Black', popular: false },
-    { id: 'white', label: 'White', popular: false },
-    { id: 'mirror', label: 'Mirror', popular: false },
-  ];
-
+export function BackboardOptions({
+  backStyle,
+  setBackStyle,
+  backColor,
+  setBackColor,
+}: {
+  backStyle: BackboardStyle;
+  setBackStyle: (v: BackboardStyle) => void;
+  backColor: BackboardColor;
+  setBackColor: (v: BackboardColor) => void;
+}) {
   return (
-    <div className="bg-bgBlack/50 border border-neonPurple/30 rounded-xl p-6"> 
-      <h3 className="text-xl font-heading text-iceBlue mb-4">BACKBOARD OPTIONS</h3>
-
-      <div className="mb-6"> 
-        <h4 className="font-bold mb-3">CHOOSE BACKBOARD STYLE</h4>
-        <div className="grid grid-cols-2 gap-3"> 
-          {styles.map((style) => ( 
-            <button 
-              key={style.id} 
-              className={`p-3 rounded-lg border-2 text-center text-sm relative ${ 
-                selectedStyle === style.id 
-                ? 'border-neonPurple bg-neonPurple/10 shadow-neon' 
-                : 'border-gray-700 hover:border-iceBlue' 
-              }`} 
-              onClick={() => onStyleSelect(style.id)} 
-            > 
-              {style.label} 
-              {style.popular && ( 
-                <span className="absolute -top-2 -right-2 bg-neonPurple text-bgBlack text-xs px-2 py-1 rounded-full"> 
-                  POPULAR 
-                </span> 
-              )} 
-            </button> 
-          ))} 
-        </div> 
+    <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
+      <h3 className="mb-3 text-sm font-semibold tracking-wide text-white/80">5 BACKBOARD</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {([
+          { id: "cut-to-letter", label: "Cut to Letter" },
+          { id: "rectangle", label: "Rectangle" },
+          { id: "fine-cut", label: "Fine Cut" },
+          { id: "no-backboard", label: "No Backboard" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setBackStyle(opt.id)}
+            className={`rounded-xl border p-3 text-left ${backStyle === opt.id ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"}`}
+          >
+            <div className="text-sm font-semibold text-white">{opt.label}</div>
+          </button>
+        ))}
       </div>
-
-      {selectedStyle !== 'none' && ( 
-        <div> 
-          <h4 className="font-bold mb-3">CHOOSE BACKBOARD COLOR</h4> 
-          <div className="grid grid-cols-2 gap-3"> 
-            {colors.map((color) => ( 
-              <button 
-                key={color.id} 
-                className={`p-3 rounded-lg border-2 text-center text-sm relative ${ 
-                  selectedColor === color.id 
-                  ? 'border-neonPurple bg-neonPurple/10 shadow-neon'
-                  : 'border-gray-700 hover:border-iceBlue'
-                }`} 
-                onClick={() => onColorSelect(color.id)} 
-              > 
-                {color.label}
-                {color.popular && (
-                  <span className="absolute -top-2 -right-2 bg-neonPurple text-bgBlack text-xs px-2 py-1 rounded-full">
-                    POPULAR
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
+      <div className="mt-4 grid grid-cols-4 gap-3">
+        {([
+          { id: "clear", label: "Clear" },
+          { id: "white", label: "White" },
+          { id: "black", label: "Black" },
+          { id: "mirror", label: "Mirror" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setBackColor(opt.id)}
+            className={`rounded-xl border p-3 text-center ${backColor === opt.id ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"}`}
+          >
+            <div className="text-sm font-semibold text-white">{opt.label}</div>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }

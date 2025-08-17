@@ -1,24 +1,11 @@
 /** @type {import('next').NextConfig} */
-const withBundleAnalyzer = require('@next/bundle-analyzer')({
-  enabled: process.env.ANALYZE === 'true',
-});
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  disable: process.env.NODE_ENV === 'development',
-  register: true,
-  skipWaiting: true,
-});
-
 const nextConfig = {
   experimental: {
     optimizePackageImports: ['@aws-sdk/client-ses', 'framer-motion', 'zod'],
   },
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
     ],
     minimumCacheTTL: 3600,
   },
@@ -39,4 +26,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withBundleAnalyzer(withPWA(nextConfig));
+module.exports = nextConfig;

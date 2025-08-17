@@ -1,52 +1,31 @@
-import type { Metadata } from 'next';
-import { Orbitron, Poppins } from 'next/font/google';
-import './globals.css';
-import Header from '@/components/Header';
-import ErrorBoundary from '@/components/ErrorBoundary';
-import Counter from '@/components/Counter';
+import type { Metadata } from "next";
+import "./globals.css";
+import { Header } from "@/components/Header";
+import { Poppins } from "next/font/google";
 
-const orbitron = Orbitron({
-  subsets: ['latin'],
-  variable: '--font-heading',
-});
-
-const poppins = Poppins({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600', '700'],
-  variable: '--font-sans',
+const poppins = Poppins({ 
+  subsets: ["latin"], 
+  weight: ["400","600","700"], 
+  variable: "--font-sans" 
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://neontj.com'),
-  title: 'NEONTJ | Custom LED Neon Signs | Fastest in New Orleans',
-  description: 'Premium custom LED neon signs with free 2-day shipping and same-day local delivery in Orleans Parish. Not the cheapest — just the best.',
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://neontj.com"),
+  title: "NeonTJ — Custom Neon Signs",
+  description: "Design custom neon text or submit a logo for a fast quote.",
   openGraph: {
-    title: 'NEONTJ | Custom LED Neon Signs',
-    description: 'Premium custom LED neon signs with fast shipping',
-    images: '/og-image.jpg',
-  },
-  robots: {
-    index: true,
-    follow: true,
-    nocache: false,
+    title: "NeonTJ — Custom Neon Signs",
+    description: "Design custom neon text or submit a logo for a fast quote.",
+    type: "website",
   },
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${orbitron.variable} ${poppins.variable}`}>
-      <body className="relative">
-        <ErrorBoundary 
-          fallback={<div className="p-8 text-center">An error occurred. Please refresh the page.</div>}
-        >
-          <Counter />
-          <Header />
-          {children}
-        </ErrorBoundary>
+    <html lang="en" className={poppins.variable}>
+      <body className="min-h-screen bg-black text-white">
+        <Header />
+        {children}
       </body>
     </html>
   );

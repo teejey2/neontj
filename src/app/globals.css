@@ -1,59 +1,60 @@
+/* globals.css — NeonTJ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --neon-glow-purple: 0 0 8px rgba(184, 0, 255, 0.7), 0 0 16px rgba(184, 0, 255, 0.4);
-    --neon-glow-blue: 0 0 8px rgba(0, 255, 255, 0.7), 0 0 16px rgba(0, 255, 255, 0.4);
+    --bg: #0b0b0f;
+    color-scheme: dark;
   }
 
-  body {
-    @apply bg-bgBlack text-ledWhite font-sans antialiased;
-    text-rendering: optimizeLegibility;
+  html, body {
+    background: var(--bg);
+    color: #fff;
   }
 
-  ::selection {
-    @apply bg-neonPurple/30 text-iceBlue;
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Accessible focus ring with neon vibe */
+  :focus-visible {
+    outline: 2px solid #c084fc; /* violet-400 */
+    outline-offset: 2px;
+  }
+
+  /* Hide number input spinners (cross-browser) */
+  input[type="number"] {
+    appearance: textfield;       /* standard */
+    -moz-appearance: textfield;  /* Firefox */
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;            /* standard (no-op for pseudo, silences linter) */
+    -webkit-appearance: none;    /* WebKit */
+    margin: 0;
   }
 }
-
+/* === NeonTJ component utilities === */
 @layer components {
-  .neon-text {
-    @apply text-neonPurple;
-    text-shadow: var(--neon-glow-purple);
-    transition: text-shadow 0.3s ease;
+  .neon-text { /* purple neon text glow */
+    @apply text-neon-purple;
+    text-shadow: 0 0 6px rgba(155,92,255,.9), 0 0 14px rgba(63,213,255,.45);
   }
-
-  .neon-button {
-    @apply relative px-6 py-3 rounded-full bg-bgBlack border-2 border-neonPurple
-      text-neonPurple font-heading font-bold tracking-wider uppercase 
-      transition-all duration-300 overflow-hidden z-0;
-    box-shadow: var(--neon-glow-purple);
+  .neon-button { /* CTA glow button */
+    @apply bg-bgBlack text-white border border-neon-purple rounded-xl px-5 py-3 shadow-glow transition;
   }
-
-  .neon-button:hover {
-    @apply bg-neonPurple text-bgBlack scale-105;
-    box-shadow: var(--neon-glow-purple), 0 0 24px rgba(184, 0, 255, 0.6);
+  .neon-button:hover { @apply shadow-glow; filter: brightness(1.1); }
+  .neon-card { /* panels & header */
+    @apply bg-bgBlack/60 backdrop-blur border border-white/10 rounded-2xl shadow-glow;
   }
 }
 
-@layer utilities {
-  .shadow-neon {
-    box-shadow: var(--neon-glow-purple);
-  }
-  
-  /* Add smooth transitions for color changes */
-  .color-transition {
-    transition: color 0.3s ease, text-shadow 0.3s ease, filter 0.3s ease;
-  }
+/* Optional: glowing focus ring */
+:root {
+  --focus: 0 0 0 3px rgba(155,92,255,.55), 0 0 0 6px rgba(63,213,255,.25);
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-
-@font-face {
-  font-family: 'Monoton';
-  src: url('/fonts/Monoton-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-display: swap;
-}
+:focus-visible { outline: none !important; box-shadow: var(--focus); }
