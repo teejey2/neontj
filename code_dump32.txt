@@ -1,0 +1,2639 @@
+﻿package.json
+C:\neontj\package.json
+{
+  "name": "neontj",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@aws-sdk/client-ses": "^3.848.0",
+    "@heroicons/react": "^2.2.0",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.2.0",
+    "framer-motion": "^12.23.0",
+    "html-to-image": "^1.11.13",
+    "next": "^15.3.5",
+    "nodemailer": "^7.0.5",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-google-recaptcha": "^3.1.0",
+    "zod": "^4.0.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@types/node": "^20",
+    "@types/nodemailer": "^6.4.17",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-google-recaptcha": "^2.1.9",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8",
+    "eslint-config-next": "^15.4.6",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}
+
+--------------------------------------------------------------------------------
+
+postcss.config.js
+C:\neontj\postcss.config.js
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+--------------------------------------------------------------------------------
+
+tailwind.config.js
+C:\neontj\tailwind.config.js
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
+  ],
+  theme: {
+    extend: {
+      colors: {
+        bgBlack: "#0b0b0f", // used by bg-bgBlack
+        neon: {
+          purple: "#9b5cff",
+          pink: "#ff4bd1",
+          blue: "#3fd5ff",
+          ice: "#b7e9ff", // optional alias for iceBlue
+        },
+      },
+      fontFamily: {
+        // Inter will be provided by next/font with a CSS variable
+        heading: ["var(--font-inter)", "ui-sans-serif", "system-ui"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui"],
+      },
+      boxShadow: {
+        // soft neon outer glow used as shadow-glow
+        glow: "0 0 12px rgba(155,92,255,0.45), 0 0 30px rgba(63,213,255,0.25)",
+      },
+      dropShadow: {
+        neon: "0 0 8px rgba(155,92,255,0.65)",
+      },
+    },
+  },
+  plugins: [],
+};
+
+--------------------------------------------------------------------------------
+
+tsconfig.json
+C:\neontj\tsconfig.json
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "allowJs": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "moduleDetection": "force",
+    "target": "ES2020",
+    "plugins": [{ "name": "next" }]
+  },
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
+}
+
+--------------------------------------------------------------------------------
+
+globals.css
+C:\neontj\src\app\globals.css
+/* globals.css â€” NeonTJ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #0b0b0f;
+    color-scheme: dark;
+  }
+
+  html, body {
+    background: var(--bg);
+    color: #fff;
+  }
+
+  /* Remove tap highlight on mobile */
+  * {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Accessible focus ring with neon vibe */
+  :focus-visible {
+    outline: 2px solid #c084fc; /* violet-400 */
+    outline-offset: 2px;
+  }
+
+  /* Hide number input spinners (cross-browser) */
+  input[type="number"] {
+    appearance: textfield;       /* standard */
+    -moz-appearance: textfield;  /* Firefox */
+  }
+
+  input[type="number"]::-webkit-outer-spin-button,
+  input[type="number"]::-webkit-inner-spin-button {
+    appearance: none;            /* standard (no-op for pseudo, silences linter) */
+    -webkit-appearance: none;    /* WebKit */
+    margin: 0;
+  }
+}
+/* === NeonTJ component utilities === */
+@layer components {
+  .neon-text { /* purple neon text glow */
+    @apply text-neon-purple;
+    text-shadow: 0 0 6px rgba(155,92,255,.9), 0 0 14px rgba(63,213,255,.45);
+  }
+  .neon-button { /* CTA glow button */
+    @apply bg-bgBlack text-white border border-neon-purple rounded-xl px-5 py-3 shadow-glow transition;
+  }
+  .neon-button:hover { @apply shadow-glow; filter: brightness(1.1); }
+  .neon-card { /* panels & header */
+    @apply bg-bgBlack/60 backdrop-blur border border-white/10 rounded-2xl shadow-glow;
+  }
+}
+
+/* Optional: glowing focus ring */
+:root {
+  --focus: 0 0 0 3px rgba(155,92,255,.55), 0 0 0 6px rgba(63,213,255,.25);
+}
+:focus-visible { outline: none !important; box-shadow: var(--focus); }
+--------------------------------------------------------------------------------
+
+layout.tsx
+C:\neontj\src\app\layout.tsx
+/* src/app/layout.tsx */
+import type { Metadata } from "next";
+import "./globals.css";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
+import { Inter } from "next/font/google";
+import { fontVarsClass } from "@/lib/fonts"; // âœ… add this
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
+
+export const metadata: Metadata = {
+  title: { default: "NeonTJ â€” Custom LED Neon Signs", template: "%s â€” NeonTJ" },
+  description: "Design a custom LED neon sign with instant preview and fast quotes.",
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="en" className={`${inter.variable} ${fontVarsClass} bg-black text-white`}>
+      <body className="font-sans">
+        <Header />
+        <div className="min-h-[calc(100vh-200px)]">{children}</div>
+        <Footer />
+      </body>
+    </html>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+page.tsx
+C:\neontj\src\app\page.tsx
+// src/app/page.tsx
+'use client';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Hero from '@/components/Hero';
+import Counter from '@/components/Counter';
+import Link from 'next/link';
+import Testimonials from '@/components/Testimonials';
+
+const galleryImages = [
+  { id: 1, src: '/images/gallery/gallery1.jpg', alt: 'Custom Neon Bar Sign' },
+  { id: 2, src: '/images/gallery/gallery2.jpg', alt: 'Personalized Name Neon' },
+  { id: 3, src: '/images/gallery/gallery3.jpg', alt: 'LED Business Sign' },
+  { id: 4, src: '/images/gallery/gallery4.jpg', alt: 'Home Decor Neon' },
+  { id: 5, src: '/images/gallery/gallery5.jpg', alt: 'Wedding Neon Art' },
+  { id: 6, src: '/images/gallery/gallery6.jpg', alt: 'Music Themed Sign' },
+  { id: 7, src: '/images/gallery/gallery7.jpg', alt: 'Sports Team Neon' },
+  { id: 8, src: '/images/gallery/gallery8.jpg', alt: 'Quotation Sign' },
+  { id: 9, src: '/images/gallery/gallery9.jpg', alt: 'Logo Design' },
+];
+
+function GalleryItem({ src, alt }: { src: string; alt: string }) {
+  return (
+    <motion.div whileHover={{ scale: 1.05 }} className="overflow-hidden rounded-lg shadow-glow">
+
+      <Image
+        src={src}
+        alt={alt}
+        width={400}
+        height={400}
+        className="w-full h-auto object-cover aspect-square"
+        placeholder="blur"
+        blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4="
+      />
+    </motion.div>
+  );
+}
+
+export default function Home() {
+  return (
+    <main className="min-h-screen">
+      <Hero />
+
+      <section className="bg-gradient-to-r from-neon-purple/20 to-neon-ice/20 py-8">
+        <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div className="p-4">
+            <h3 className="text-3xl md:text-4xl font-heading text-neon-ice">2-Day</h3>
+            <p className="text-sm uppercase tracking-wide text-white/80">FAST SHIPPING</p>
+          </div>
+          <div className="p-4">
+            <h3 className="text-3xl md:text-4xl font-heading text-neon-ice">MADE</h3>
+            <p className="text-sm uppercase tracking-wide text-white/80">IN THE US</p>
+          </div>
+          <div className="p-4">
+            <h3 className="text-3xl md:text-4xl font-heading text-neon-ice">100%</h3>
+            <p className="text-sm uppercase tracking-wide text-white/80">SATISFACTION</p>
+          </div>
+          <div className="p-4">
+            <h3 className="text-3xl md:text-4xl font-heading neon-text">1,218+</h3>
+            <p className="text-sm uppercase tracking-wide text-white/80">SIGNS LIT</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-20 container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-5xl font-heading mb-4">
+            <span className="neon-text">Recent</span> Creations
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+          {galleryImages.map((image) => (
+            <GalleryItem key={image.id} src={image.src} alt={image.alt} />
+          ))}
+        </div>
+
+        <div className="text-center mt-8">
+          <Link href="/portfolio">
+            <button className="neon-button px-6 py-3">See More Portfolio</button>
+          </Link>
+        </div>
+      </section>
+
+      <Testimonials />
+
+      <section className="py-20 bg-gradient-to-b from-bgBlack to-neon-purple/10">
+        <div className="container mx-auto px-4 text-center">
+          <Link href="/custom-sign">
+            <button className="neon-button px-8 py-4 text-xl">Design Your Sign Now</button>
+          </Link>
+        </div>
+      </section>
+    </main>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+route.ts
+C:\neontj\src\app\api\quote\route.ts
+/* src/app/api/quote/route.ts */
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { SESClient, SendEmailCommand } from "@aws-sdk/client-ses";
+
+const EXPOSE_ERRORS = process.env.EXPOSE_ERRORS === "1";
+const QUOTES_DRY_RUN = process.env.QUOTES_DRY_RUN === "1";
+
+type Bucket = { count: number; resetAt: number };
+const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
+const RATE_LIMIT_MAX = 10;
+const buckets = new Map<string, Bucket>();
+function rateCheck(ip: string) {
+  const now = Date.now();
+  const b = buckets.get(ip);
+  if (!b || now > b.resetAt) {
+    buckets.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return true;
+  }
+  if (b.count >= RATE_LIMIT_MAX) return false;
+  b.count += 1;
+  return true;
+}
+
+const CustomerSchema = z.object({
+  name: z.string().min(1),
+  email: z.string().email(),
+  phone: z.string().optional().default(""),
+  message: z.string().optional().default(""),
+});
+
+const DesignSchema = z.object({
+  text: z.string().min(1),
+  fontId: z.string().min(1),
+  singleColor: z.string().min(1),
+  multicolor: z.boolean(),
+  perLetter: z.array(z.string()),
+  sizeId: z.string().min(1),
+  backStyle: z.string().min(1),
+  backColor: z.string().min(1),
+});
+
+const MetaSchema = z.object({
+  userAgent: z.string().optional(),
+  page: z.string().optional(),
+  estimate: z.number().optional().nullable(),
+  mockupDataUrl: z.string().optional(),
+}).partial();
+
+const QuoteSchema = z.object({
+  customer: CustomerSchema,
+  design: DesignSchema,
+  meta: MetaSchema.optional(),
+  company: z.string().optional(),
+});
+
+function json(data: any, status = 200) {
+  return NextResponse.json(data, { status });
+}
+
+export async function POST(req: Request) {
+  try {
+    const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim() || "unknown";
+    if (!rateCheck(ip)) return json({ ok: false, error: "rate_limited" }, 429);
+
+    const raw = await req.json().catch(() => ({}));
+    const parsed = QuoteSchema.safeParse(raw);
+    if (!parsed.success) {
+      return json({ ok: false, error: "invalid_request", details: EXPOSE_ERRORS ? parsed.error.flatten() : undefined }, 400);
+    }
+    const { customer, design, meta, company } = parsed.data;
+
+    if (company && company.trim()) return json({ ok: true });
+
+    const subjectText = design.text.replace(/\s+/g, " ").trim();
+    const subject = `NeonTJ Quote: ${subjectText.slice(0, 50)}${subjectText.length > 50 ? "..." : ""}`;
+
+    const textBody = [
+      `New quote request from ${customer.name}`,
+      ``,
+      `Contact`,
+      `- Email: ${customer.email}`,
+      `- Phone: ${customer.phone || "Not provided"}`,
+      ``,
+      `Design`,
+      `- Text:`, design.text,
+      `- Font: ${design.fontId}`,
+      `- Size: ${design.sizeId}`,
+      `- Colors: ${design.multicolor ? `Multicolor: ${design.perLetter.join(", ")}` : `Single (${design.singleColor})`}`,
+      `- Backboard: ${design.backStyle} (${design.backColor})`,
+      ``,
+      `Notes`,
+      customer.message || "No additional notes",
+      ``,
+      `Meta`,
+      `- Page: ${meta?.page || "Unknown"}`,
+      `- Estimate: ${typeof meta?.estimate === "number" ? `$${meta.estimate}` : "Not calculated"}`,
+    ].join("\n");
+
+    const esc = (s: string) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    const colorRow = (hex: string, idx?: number) => `
+      <tr>
+        <td style="padding:4px 8px;font:13px/1.4 Inter,Arial,sans-serif;color:#EDEDED;">
+          ${idx !== undefined ? `Letter ${idx + 1}` : "Color"}
+        </td>
+        <td style="padding:4px 8px;">
+          <span style="display:inline-block;width:14px;height:14px;border:1px solid #999;background:${hex};vertical-align:middle;"></span>
+          <span style="font:13px/1.4 Inter,Arial,sans-serif;color:#EDEDED;margin-left:8px;">${hex}</span>
+        </td>
+      </tr>`;
+
+    const colorsSection = design.multicolor
+      ? `<p style="margin:8px 0 4px;font-weight:600;color:#EDEDED;">Colors (per-letter)</p>
+         <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#121212;border:1px solid #333;border-radius:8px;overflow:hidden;"><tbody>
+           ${design.perLetter.map((c, i) => colorRow(c, i)).join("")}
+         </tbody></table>`
+      : `<p style="margin:8px 0 4px;font-weight:600;color:#EDEDED;">Color</p>
+         <table cellspacing="0" cellpadding="0" style="border-collapse:collapse;background:#121212;border:1px solid #333;border-radius:8px;overflow:hidden;"><tbody>
+           ${colorRow(design.singleColor)}
+         </tbody></table>`;
+
+    const mockupImg = meta?.mockupDataUrl
+      ? `<div style="margin-top:12px;"><img src="${meta.mockupDataUrl}" alt="Mockup" style="max-width:480px;width:100%;border-radius:12px;border:1px solid #333;"/></div>`
+      : "";
+
+    const htmlBody = `
+<!doctype html><html><body style="margin:0;padding:0;background:#0B0B0C;">
+  <div style="max-width:640px;margin:0 auto;padding:20px;font:14px/1.6 Inter,Arial,sans-serif;color:#EDEDED;">
+    <h2 style="margin:0 0 12px 0;font-size:20px;">New quote request from ${esc(customer.name)}</h2>
+    <h3 style="margin:16px 0 6px 0;font-size:14px;color:#B7B7B7;">Contact</h3>
+    <div style="background:#121212;border:1px solid #333;border-radius:10px;padding:10px;">
+      <div>- Email: <a href="mailto:${esc(customer.email)}" style="color:#9AE6FF;">${esc(customer.email)}</a></div>
+      <div>- Phone: ${esc(customer.phone || "Not provided")}</div>
+    </div>
+    <h3 style="margin:16px 0 6px 0;font-size:14px;color:#B7B7B7;">Design</h3>
+    <div style="background:#121212;border:1px solid #333;border-radius:10px;padding:10px;">
+      <div style="margin-bottom:8px;">- <strong>Text</strong>:</div>
+      <pre style="white-space:pre-wrap;margin:0 0 8px 0;color:#EDEDED;">${esc(design.text)}</pre>
+      <div>- Font: ${esc(design.fontId)}</div>
+      <div>- Size: ${esc(design.sizeId)}</div>
+      <div>- Backboard: ${esc(design.backStyle)} (${esc(design.backColor)})</div>
+      ${colorsSection}
+      ${mockupImg}
+    </div>
+    <h3 style="margin:16px 0 6px 0;font-size:14px;color:#B7B7B7;">Notes</h3>
+    <div style="background:#121212;border:1px solid #333;border-radius:10px;padding:10px;">${esc(customer.message || "No additional notes")}</div>
+    <h3 style="margin:16px 0 6px 0;font-size:14px;color:#B7B7B7;">Meta</h3>
+    <div style="background:#121212;border:1px solid #333;border-radius:10px;padding:10px;">
+      <div>- Page: ${esc(meta?.page || "Unknown")}</div>
+      <div>- Estimate: ${typeof meta?.estimate === "number" ? `$${meta.estimate}` : "Not calculated"}</div>
+    </div>
+  </div>
+</body></html>`.trim();
+
+    const region = process.env.SES_REGION || process.env.AWS_REGION || "us-east-1";
+    const from = (process.env.SES_FROM || "").trim();
+    const toList = (process.env.SES_TO || "").split(",").map((s) => s.trim()).filter(Boolean);
+
+    if (QUOTES_DRY_RUN) {
+      console.log(`[DRY RUN] Email would be sent:`, { subject, to: toList });
+      return json({ ok: true, dryRun: true });
+    }
+
+    if (!from || toList.length === 0) {
+      return json({ ok: false, error: "ses_not_configured", details: EXPOSE_ERRORS ? { from, toCount: toList.length } : undefined }, 500);
+    }
+
+    const client = new SESClient({ region });
+    const cmd = new SendEmailCommand({
+      Source: from,
+      Destination: { ToAddresses: toList },
+      Message: {
+        Subject: { Data: subject, Charset: "UTF-8" },
+        Body: { Text: { Data: textBody, Charset: "UTF-8" }, Html: { Data: htmlBody, Charset: "UTF-8" } },
+      },
+      ReplyToAddresses: [customer.email],
+    });
+    await client.send(cmd);
+    return json({ ok: true });
+  } catch (err: any) {
+    return json({ ok: false, error: "server_error", details: EXPOSE_ERRORS ? String(err?.message || err) : undefined }, 500);
+  }
+}
+
+export async function GET() {
+  return NextResponse.json({
+    status: "active",
+    env: process.env.NODE_ENV,
+    quotes_dry_run: QUOTES_DRY_RUN,
+    ses_region: process.env.SES_REGION || process.env.AWS_REGION || "unset",
+    ses_from_set: Boolean(process.env.SES_FROM),
+    ses_to_count: (process.env.SES_TO || "").split(",").filter(Boolean).length,
+    expose_errors: EXPOSE_ERRORS,
+  });
+}
+
+--------------------------------------------------------------------------------
+
+page.tsx
+C:\neontj\src\app\custom-sign\page.tsx
+/* src/app/custom-sign/page.tsx */
+"use client";
+
+import React, { useMemo, useState } from "react";
+import Preview, {
+  type BackboardStyle,
+  type BackboardColor,
+} from "@/components/customizer/Preview";
+import OptionsPanel from "@/components/customizer/OptionsPanel";
+import QuoteForm from "@/components/customizer/QuoteForm";
+import { SIZE_CATALOG, type SizeId } from "@/lib/pricing";
+import type { FontId } from "@/lib/fonts";
+import { normalizeFontId } from "@/lib/fonts";
+
+export default function CustomSignPage() {
+  // text
+  const [text, setText] = useState<string>("Your\nText");
+
+  // fonts (masked ids)
+  const [fontId, setFontId] = useState<FontId>(normalizeFontId("n1"));
+
+  // colors
+  const [multicolor, setMulticolor] = useState<boolean>(false);
+  const [singleColor, setSingleColor] = useState<string>("#B2FFF2");
+  const [perLetter, setPerLetter] = useState<string[]>([]);
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
+
+  // size
+  const [sizeId, setSizeId] = useState<SizeId>("mini");
+
+  // backboard
+  const [backStyle, setBackStyle] = useState<BackboardStyle>("cut-to-letter");
+  const [backColor, setBackColor] = useState<BackboardColor>("clear");
+
+  // keep per-letter array length in sync with text
+  const flat = useMemo(() => text.replace(/\n/g, ""), [text]);
+  React.useEffect(() => {
+    if (multicolor) {
+      setPerLetter((prev) => {
+        if (prev.length !== flat.length) {
+          return Array.from({ length: flat.length }, () => singleColor);
+        }
+        return prev;
+      });
+      if (activeIndex !== null && activeIndex >= flat.length) {
+        setActiveIndex(flat.length ? flat.length - 1 : null);
+      }
+    } else {
+      if (perLetter.length) setPerLetter([]);
+      setActiveIndex(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flat.length, multicolor]);
+
+  // quick estimate (server/email still confirms final)
+  const estimate = (() => {
+    const s = SIZE_CATALOG[sizeId];
+    if (!s) return 0;
+    const chars = Math.max(flat.length, 1);
+    return Math.round((s.widthIn * 1.2 + chars * 1.5) * 1.8 + 25);
+  })();
+
+  return (
+    <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-10 md:grid-cols-12">
+      {/* LEFT: sticky preview */}
+      <div className="md:col-span-5">
+        <div className="sticky top-16 z-30 px-4">
+          <Preview
+            id="sign-preview"
+            text={text}
+            fontId={fontId}
+            singleColor={singleColor}
+            multicolor={multicolor}
+            perLetter={perLetter}
+            backStyle={backStyle}
+            backColor={backColor}
+            activeIndex={activeIndex ?? null}
+            onSelectIndex={(i) => setActiveIndex(i)}
+          />
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-white/70">Estimated Price</span>
+              <span className="font-semibold">${estimate}</span>
+            </div>
+            <p className="mt-1 text-xs text-white/50">
+              Final price confirmed after design review.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* RIGHT: options + form */}
+      <div className="md:col-span-7">
+        <OptionsPanel
+          text={text}
+          setText={setText}
+          fontId={fontId}
+          setFontId={(v: string) => setFontId(v as FontId)}
+          multicolor={multicolor}
+          setMulticolor={setMulticolor}
+          singleColor={singleColor}
+          setSingleColor={setSingleColor}
+          activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
+          perLetter={perLetter}
+          setPerLetter={setPerLetter}
+          sizeId={sizeId}
+          setSizeId={setSizeId}
+          backStyle={backStyle}
+          setBackStyle={setBackStyle}
+          backColor={backColor}
+          setBackColor={setBackColor}
+        />
+
+        {/* Quote form â€” expects { payload, mode } */}
+        <div className="mt-6">
+          <QuoteForm
+            payload={{
+              text,
+              fontId,
+              sizeId,
+              multicolor,
+              perLetter,
+              singleColor,
+              backStyle,
+              backColor,
+            }}
+            mode="text"
+          />
+        </div>
+      </div>
+    </main>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+page.tsx
+C:\neontj\src\app\portfolio\page.tsx
+import Gallery from '@/components/portfolio/Gallery';
+import { fetchGalleryImages } from '@/lib/gallery';
+import { Metadata } from 'next';
+import LoadingSpinner from '@/components/LoadingSpinner'; // Fixed import
+import { Suspense } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Portfolio | NEONTJ Custom Neon Signs',
+  description: 'Browse our collection of custom LED neon signs created for bars, restaurants, weddings, and home decor',
+  openGraph: {
+    title: 'Portfolio | NEONTJ Custom Neon Signs',
+    description: 'See our stunning collection of custom LED neon signs',
+    images: '/images/portfolio/og-image.jpg',
+  },
+};
+
+async function PortfolioContent() {
+  const images = await fetchGalleryImages();
+  return <Gallery initialImages={images} />;
+}
+
+export default function PortfolioPage() {
+  return (
+    <Suspense fallback={<LoadingSpinner />}>
+      <PortfolioContent />
+    </Suspense>
+  );
+}
+--------------------------------------------------------------------------------
+
+page.tsx
+C:\neontj\src\app\privacy\page.tsx
+export const metadata = {
+  title: 'Privacy Policy â€” NeonTJ',
+  description: 'How NeonTJ collects and uses data for our custom neon sign service.',
+};
+
+export default function PrivacyPage() {
+  return (
+    <main className="prose prose-invert max-w-3xl mx-auto py-16 px-4">
+      <h1 className="neon-text">Privacy Policy</h1>
+      <p>Effective date: July 23, 2025</p>
+
+      <section>
+        <h2>1. Information We Collect</h2>
+        <p>We collect the following types of information when you use our services:</p>
+        <ul>
+          <li><strong>Personal Information:</strong> Name, email address, phone number, and shipping address when you place an order or request a quote.</li>
+          <li><strong>Design Information:</strong> Custom text, logos, colors, and specifications for your neon sign.</li>
+          <li><strong>Payment Information:</strong> We use Stripe for payment processing and do not store your credit card details on our servers.</li>
+          <li><strong>Technical Information:</strong> IP address, browser type, device information, and usage data through cookies.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>2. How We Use Your Information</h2>
+        <p>We use your information for the following purposes:</p>
+        <ul>
+          <li>To create and fulfill your custom neon sign orders</li>
+          <li>To communicate with you about your order status</li>
+          <li>To provide customer support and respond to inquiries</li>
+          <li>To improve our products, services, and website experience</li>
+          <li>To send promotional offers (only with your explicit consent)</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>3. Data Sharing and Disclosure</h2>
+        <p>We do not sell your personal information. We may share information with:</p>
+        <ul>
+          <li><strong>Service Providers:</strong> Payment processors (Stripe), shipping carriers (FedEx, UPS), and cloud storage providers (AWS).</li>
+          <li><strong>Legal Requirements:</strong> When required by law or to protect our rights and safety.</li>
+          <li><strong>Business Transfers:</strong> In connection with a merger or acquisition of our business.</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>4. Data Security</h2>
+        <p>We implement industry-standard security measures including:</p>
+        <ul>
+          <li>SSL encryption for all data transmissions</li>
+          <li>Secure storage on AWS servers with regular security audits</li>
+          <li>Limited access to personal information to authorized personnel only</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>5. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+          <li>Access and receive a copy of your personal data</li>
+          <li>Correct inaccurate personal information</li>
+          <li>Request deletion of your personal data</li>
+          <li>Opt-out of marketing communications</li>
+        </ul>
+        <p>To exercise these rights, contact us at <a href="mailto:privacy@neontj.com" className="text-neon-ice">privacy@neontj.com</a>.</p>
+      </section>
+
+      <section>
+        <h2>6. Cookies</h2>
+        <p>We use cookies to:</p>
+        <ul>
+          <li>Remember your design preferences during customization</li>
+          <li>Analyze website traffic using Google Analytics (anonymized data)</li>
+          <li>Provide personalized content based on your browsing history</li>
+        </ul>
+        <p>You can manage cookie preferences through your browser settings.</p>
+      </section>
+
+      <section>
+        <h2>7. Changes to This Policy</h2>
+        <p>We may update this policy periodically. The latest version will always be posted on our website with the effective date.</p>
+      </section>
+
+      <section>
+        <h2>8. Contact Us</h2>
+        <p>Questions about this policy? Contact us at:</p>
+        <address className="not-italic mt-2">
+          NeonTJ Privacy Officer<br />
+          <a href="mailto:privacy@neontj.com" className="text-neon-ice">privacy@neontj.com</a><br />
+          123 Neon Street, New Orleans, LA 70115
+        </address>
+      </section>
+    </main>
+  );
+}
+--------------------------------------------------------------------------------
+
+page.tsx
+C:\neontj\src\app\submit-logo\page.tsx
+// src/app/submit-logo/page.tsx
+import React from "react";
+import QuoteForm, { type DesignPayload } from "@/components/customizer/QuoteForm";
+import type { FontId } from "@/lib/fonts";
+
+export default function SubmitLogoPage() {
+  const defaultFont: FontId = "orbitron";
+
+  const payload: DesignPayload = {
+    text: "LOGO",
+    fontId: defaultFont,
+    singleColor: "#B2FFF2",
+    multicolor: false,
+    perLetter: [],
+    sizeId: "mini",
+    backStyle: "rectangle",
+    backColor: "clear",
+  };
+
+  return (
+    <main className="mx-auto max-w-4xl px-4 py-10">
+      <h1 className="mb-6 text-2xl font-bold text-white">Submit Your Logo</h1>
+      <p className="mb-6 text-white/70">
+        Upload your logo in the quote form notes â€” weâ€™ll review vector quality and send a final price.
+      </p>
+      <QuoteForm payload={payload} mode="logo" />
+    </main>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Counter.tsx
+C:\neontj\src\components\Counter.tsx
+'use client';
+import { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+
+export default function Counter() {
+  const [count, setCount] = useState(1218);
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const savedCount = localStorage.getItem('neonSignCount');
+    const initialCount = savedCount ? parseInt(savedCount, 10) : 1218;
+    setCount(initialCount);
+    
+    // Only show after 2 seconds delay
+    const timer = setTimeout(() => setIsVisible(true), 2000);
+    
+    const interval = setInterval(() => {
+      setCount(prev => {
+        const newCount = prev + 1;
+        localStorage.setItem('neonSignCount', newCount.toString());
+        return newCount;
+      });
+    }, 1000 * 60 * 60 * 24); // Daily update
+
+    return () => {
+      clearTimeout(timer);
+      clearInterval(interval);
+    };
+  }, []);
+
+  if (!isVisible) return null;
+
+  return (
+    <motion.div
+      className="fixed bottom-4 left-4 z-50 bg-bgBlack/80 backdrop-blur-sm px-3 py-1 rounded-full border border-neon-purple shadow-glow flex items-center"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0 }}
+      whileHover={{ scale: 1.05 }}
+    > 
+      <div className="flex items-center gap-1">
+        <motion.span
+          className="text-neon-purple font-heading text-sm font-bold"
+          key={count}
+          initial={{ opacity: 0, y: 5 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        > 
+          {count.toLocaleString()}+
+        </motion.span>
+        <span className="text-xs text-neon-ice/80">signs lit</span>
+      </div>
+    </motion.div>
+  );
+}
+--------------------------------------------------------------------------------
+
+ErrorBoundary.tsx
+C:\neontj\src\components\ErrorBoundary.tsx
+'use client';
+import { Component, ErrorInfo, ReactNode } from 'react';
+
+interface Props {
+  children: ReactNode;
+  fallback: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error?: Error;
+}
+
+export default class ErrorBoundary extends Component<Props, State> {
+  state: State = { hasError: false };
+
+  static getDerivedStateFromError(error: Error): State {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    console.error('Error Boundary caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+    return this.props.children;
+  }
+}
+--------------------------------------------------------------------------------
+
+Header.tsx
+C:\neontj\src\components\Header.tsx
+// src/components/Header.tsx
+"use client";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+export function Header() {
+  const pathname = usePathname();
+  const link = (href: string, label: string) => {
+    const active = pathname === href;
+    return (
+      <Link
+        href={href}
+        className={`rounded px-2 py-1 text-sm transition-colors hover:text-neon-ice ${active ? "text-neon-ice" : "text-white/85"}`}
+        aria-current={active ? "page" : undefined}
+      >
+        {label}
+      </Link>
+    );
+  };
+
+  return (
+    <header className="sticky top-0 z-40 w-full border-b border-white/10 bg-black/70 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        <Link href="/" className="text-lg font-bold tracking-wide">NeonTJ</Link>
+        <nav className="flex items-center gap-2">
+          {link("/custom-sign", "Create Text Sign")}
+          {link("/submit-logo", "Submit Logo")}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Hero.tsx
+C:\neontj\src\components\Hero.tsx
+// src/components/Hero.tsx
+'use client';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+
+interface SignImage { id: number; src: string; alt: string; }
+const demoSigns: SignImage[] = [
+  { id: 1, src: '/images/signs/sign1.jpg', alt: 'Custom Neon Sign' },
+  { id: 2, src: '/images/signs/sign2.jpg', alt: 'LED Neon Art' },
+  { id: 3, src: '/images/signs/sign3.jpg', alt: 'Personalized Neon' },
+];
+
+export default function Hero() {
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
+  return (
+    <section className="relative h-screen w-full overflow-hidden">
+      <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 gap-1 p-1">
+        {demoSigns.map((sign) => (
+          <motion.div
+            key={sign.id}
+            className="relative bg-bgBlack overflow-hidden rounded-lg"
+            initial={{ scale: 1 }}
+            animate={{ scale: hoveredId === sign.id ? 1.05 : 1, zIndex: hoveredId === sign.id ? 10 : 1 }}
+            transition={{ type: 'spring', stiffness: 300 }}
+            onHoverStart={() => setHoveredId(sign.id)}
+            onHoverEnd={() => setHoveredId(null)}
+          >
+            <Image
+              src={sign.src}
+              alt={sign.alt}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 33vw, 20vw"
+              priority={sign.id <= 3}
+              placeholder="blur"
+              blurDataURL="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjMDAwIiBvcGFjaXR5PSIwLjEiLz48L3N2Zz4="
+            />
+          </motion.div>
+        ))}
+      </div>
+
+      <div className="absolute inset-0 flex flex-col items-center justify-center bg-bgBlack/60 z-20">
+        <motion.h1
+          className="text-5xl md:text-7xl font-heading mb-6 text-center neon-text"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          NEON<span className="text-neon-ice">TJ</span>
+        </motion.h1>
+
+        <Link href="/custom-sign" className="focus:outline-none focus:ring-2 focus:ring-neon-ice rounded-full">
+          <motion.button
+            className="neon-button"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            aria-label="Get your custom quote"
+          >
+            Get Your Custom Quote â€” FAST
+          </motion.button>
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+LoadingSpinner.tsx
+C:\neontj\src\components\LoadingSpinner.tsx
+"use client";
+import React from "react";
+
+type Props = {
+  size?: number;         // px
+  className?: string;
+  label?: string;
+};
+
+function Spinner({ size = 24, className = "", label }: Props) {
+  return (
+    <div
+      className={`inline-flex items-center gap-2 ${className}`}
+      role="status"
+      aria-live="polite"
+      aria-busy="true"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width={size}
+        height={size}
+        className="animate-spin"
+        aria-hidden="true"
+      >
+        <circle
+          cx="12"
+          cy="12"
+          r="10"
+          fill="none"
+          stroke="currentColor"
+          strokeOpacity="0.2"
+          strokeWidth="4"
+        />
+        <path
+          d="M12 2a10 10 0 0 1 10 10"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="4"
+          strokeLinecap="round"
+        />
+      </svg>
+      {label ? <span className="text-sm text-white/80">{label}</span> : null}
+    </div>
+  );
+}
+
+export default Spinner;                 // default export
+export { Spinner as LoadingSpinner };   // named export (compat)
+
+--------------------------------------------------------------------------------
+
+MobileCTA.tsx
+C:\neontj\src\components\MobileCTA.tsx
+"use client";
+import { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
+import Link from 'next/link';
+
+export default function MobileCTA() {
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsVisible(window.scrollY > 380);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return (
+    <AnimatePresence>
+      {isVisible && (
+        <motion.div
+          className="lg:hidden fixed bottom-0 left-0 right-0 bg-bgBlack border-t border-neon-purple z-50"
+          initial={{ y: 100 }}
+          animate={{ y: 0 }}
+          exit={{ y: 100 }}
+          transition={{ type: 'spring', damping: 25 }}
+        >
+          <div className="container mx-auto px-4 py-3 flex justify-center">
+            <Link href="/custom-sign" className="w-full">
+              <button className="neon-button w-full py-3 text-center">
+                Design Your Sign Now
+              </button>
+            </Link>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
+--------------------------------------------------------------------------------
+
+Testimonials.tsx
+C:\neontj\src\components\Testimonials.tsx
+// src/components/Testimonials.tsx
+"use client";
+import { motion } from "framer-motion";
+import Image from "next/image";
+
+const testimonials = [
+  { id: "t1", name: "Ashley Event Services", role: "Owner", avatar: "/assets/testimonials/tktk.jpg",
+    content: "The signs are absolutely stunning and make my events unforgettable. My bookings have increased! People looovvvveeee the signs!",
+    highlight: "stunning" },
+  { id: "t2", name: "DacSun.", role: "Restaurant Owner", avatar: "/assets/testimonials/tktk.jpg",
+    content: "Customers keep asking where we got our neon sign. It's been a huge boost to our brand.",
+    highlight: "huge boost" },
+  { id: "t3", name: "Brianna L.", role: "Wedding Coordinator", avatar: "/assets/testimonials/tktk.jpg",
+    content: "From start to finish, the process was seamless. The quality is unmatched.",
+    highlight: "unmatched" },
+];
+
+export default function Testimonials() {
+  return (
+    <section id="testimonials" className="py-16 px-4 md:px-8 lg:px-16 bg-black text-white">
+      <motion.h2 className="text-3xl md:text-4xl font-bold text-center mb-12"
+        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+        What Our Clients Say
+      </motion.h2>
+
+      <div className="flex gap-6 overflow-x-auto pb-4 md:grid md:grid-cols-3 md:gap-8 md:overflow-visible scrollbar-hide">
+        {testimonials.map((t, index) => {
+          const parts = t.content.split(t.highlight);
+          return (
+            <motion.blockquote
+              key={t.id}
+              className="bg-bgBlack/50 border border-neon-purple/30 rounded-xl p-6 flex-shrink-0 md:flex-shrink md:w-auto md:block transition-transform hover:scale-105 hover:border-neon-purple"
+              initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.2 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <div className="flex items-center mb-4">
+                <Image src={t.avatar} alt={t.name} width={48} height={48} className="rounded-full border border-neon-purple" loading="lazy" />
+                <div className="ml-3">
+                  <p className="font-semibold">{t.name}</p>
+                  <p className="text-sm text-gray-400">{t.role}</p>
+                </div>
+              </div>
+              <p className="text-lg mb-4 italic">
+                &ldquo;{parts.map((part, i) => (
+                  <span key={i}>
+                    {part}
+                    {i < parts.length - 1 && <span className="text-neon-purple font-semibold">{t.highlight}</span>}
+                  </span>
+                ))}&rdquo;
+              </p>
+              <div className="flex text-neon-purple" aria-hidden="true">
+                {[...Array(5)].map((_, i) => (
+                  <motion.span key={i} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: index * 0.2 + i * 0.1 }}>
+                    â˜…
+                  </motion.span>
+                ))}
+              </div>
+            </motion.blockquote>
+          );
+        })}
+      </div>
+
+      <div className="text-center mt-12">
+        <a href="/custom-sign" className="px-6 py-3 bg-neon-purple text-white rounded-full font-bold shadow-lg hover:bg-neonPink transition">
+          Design Your Sign
+        </a>
+      </div>
+    </section>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+BackboardOptions.tsx
+C:\neontj\src\components\customizer\BackboardOptions.tsx
+// 7) src/components/customizer/BackboardOptions.tsx
+// ================================
+"use client";
+import React from "react";
+import type { BackboardStyle, BackboardColor } from "@/lib/pricing";
+
+export function BackboardOptions({
+  backStyle,
+  setBackStyle,
+  backColor,
+  setBackColor,
+}: {
+  backStyle: BackboardStyle;
+  setBackStyle: (v: BackboardStyle) => void;
+  backColor: BackboardColor;
+  setBackColor: (v: BackboardColor) => void;
+}) {
+  return (
+    <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
+      <h3 className="mb-3 text-sm font-semibold tracking-wide text-white/80">5 BACKBOARD</h3>
+      <div className="grid grid-cols-2 gap-3">
+        {([
+          { id: "cut-to-letter", label: "Cut to Letter" },
+          { id: "rectangle", label: "Rectangle" },
+          { id: "fine-cut", label: "Fine Cut" },
+          { id: "no-backboard", label: "No Backboard" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setBackStyle(opt.id)}
+            className={`rounded-xl border p-3 text-left ${backStyle === opt.id ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"}`}
+          >
+            <div className="text-sm font-semibold text-white">{opt.label}</div>
+          </button>
+        ))}
+      </div>
+      <div className="mt-4 grid grid-cols-4 gap-3">
+        {([
+          { id: "clear", label: "Clear" },
+          { id: "white", label: "White" },
+          { id: "black", label: "Black" },
+          { id: "mirror", label: "Mirror" },
+        ] as const).map((opt) => (
+          <button
+            key={opt.id}
+            onClick={() => setBackColor(opt.id)}
+            className={`rounded-xl border p-3 text-center ${backColor === opt.id ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"}`}
+          >
+            <div className="text-sm font-semibold text-white">{opt.label}</div>
+          </button>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+ColorSwatch.tsx
+C:\neontj\src\components\customizer\ColorSwatch.tsx
+// 6) src/components/customizer/ColorSwatch.tsx
+// ================================
+"use client";
+import React from "react";
+
+const COLORS = [
+  { id: "mint", hex: "#B2FFF2" },
+  { id: "pink", hex: "#FF6AD5" },
+  { id: "iceblue", hex: "#7DF9FF" },
+  { id: "white", hex: "#FFFFFF" },
+  { id: "yellow", hex: "#FFE66D" },
+  { id: "orange", hex: "#FFB254" },
+  { id: "purple", hex: "#C084FC" },
+  { id: "blue", hex: "#60A5FA" },
+  { id: "green", hex: "#86EFAC" },
+  { id: "red", hex: "#FCA5A5" },
+] as const;
+
+export function ColorSwatch({ selected, onSelect }: { selected: string; onSelect: (hex: string) => void }) {
+  return (
+    <div className="grid grid-cols-5 gap-2">
+      {COLORS.map((c) => (
+        <button
+          key={c.id}
+          aria-label={c.id}
+          onClick={() => onSelect(c.hex)}
+          className={`h-8 w-8 rounded-full border ${selected === c.hex ? "ring-2 ring-violet-400" : "border-white/20"}`}
+          style={{ background: c.hex }}
+        />
+      ))}
+    </div>
+  );
+}
+--------------------------------------------------------------------------------
+
+OptionsPanel.tsx
+C:\neontj\src\components\customizer\OptionsPanel.tsx
+/* src/components/customizer/OptionsPanel.tsx */
+"use client";
+
+import React from "react";
+import type { SizeId } from "@/lib/pricing";
+import { SIZE_CATALOG } from "@/lib/pricing";
+import { FONTS } from "@/lib/fonts";
+import type { BackboardStyle, BackboardColor } from "@/components/customizer/Preview";
+
+const BACK_STYLES: { id: BackboardStyle; label: string }[] = [
+  { id: "cut-to-letter", label: "Cut to Letter" },
+  { id: "rectangle", label: "Rectangle" },
+  { id: "rounded", label: "Rounded Rectangle" },
+  { id: "circle", label: "Circle" },
+];
+
+const BACK_COLORS: { id: BackboardColor; label: string; fill: string }[] = [
+  { id: "clear", label: "Clear", fill: "rgba(255,255,255,0.04)" },
+  { id: "black", label: "Black", fill: "rgba(0,0,0,0.96)" },
+  { id: "white", label: "White", fill: "rgba(255,255,255,0.96)" },
+  { id: "red",   label: "Red",   fill: "rgba(180,16,32,0.92)" },
+];
+
+const PALETTE = [
+  "#FF4BD1", "#9B5CFF", "#3FD5FF", "#B2FFF2",
+  "#00FF8A", "#FFD400", "#FF7A00", "#FF2E2E",
+];
+
+type Props = {
+  text: string; setText: (v: string) => void;
+  fontId: string; setFontId: (v: string) => void;
+  multicolor: boolean; setMulticolor: (v: boolean) => void;
+  singleColor: string; setSingleColor: (v: string) => void;
+  activeIndex: number | null; setActiveIndex: (v: number | null) => void;
+  perLetter: string[]; setPerLetter: (v: string[]) => void;
+  sizeId: SizeId; setSizeId: (v: SizeId) => void;
+  backStyle: BackboardStyle; setBackStyle: (v: BackboardStyle) => void;
+  backColor: BackboardColor; setBackColor: (v: BackboardColor) => void;
+};
+
+export default function OptionsPanel(p: Props) {
+  const {
+    text, setText,
+    fontId, setFontId,
+    multicolor, setMulticolor,
+    singleColor, setSingleColor,
+    activeIndex, setActiveIndex,
+    perLetter, setPerLetter,
+    sizeId, setSizeId,
+    backStyle, setBackStyle,
+    backColor, setBackColor,
+  } = p;
+
+  const flat = text.replace(/\n/g, "");
+  const syncPerLetter = (seed: string) => Array.from({ length: flat.length }, () => seed);
+
+  const applyBaseToAll = (hex: string) => setPerLetter(syncPerLetter(hex));
+
+  const setLetterColor = (hex: string) => {
+    if (activeIndex === null || activeIndex < 0 || activeIndex >= flat.length) return;
+    const next = perLetter.slice();
+    if (next.length !== flat.length) {
+      next.length = 0; next.push(...syncPerLetter(singleColor));
+    }
+    next[activeIndex] = hex;
+    setPerLetter(next);
+  };
+
+  const handleToggleMulticolor = (on: boolean) => {
+    setMulticolor(on);
+    if (on) setPerLetter(syncPerLetter(singleColor));
+    else setActiveIndex(null);
+  };
+
+  const handleBaseColorPick = (hex: string) => {
+    setSingleColor(hex);
+    if (multicolor) {
+      if (activeIndex === null) applyBaseToAll(hex);
+      else setLetterColor(hex);
+    }
+  };
+
+  const goPrev = () => {
+    if (!flat.length) return;
+    const i = activeIndex === null ? 0 : Math.max(0, activeIndex - 1);
+    setActiveIndex(i);
+  };
+
+  const goNext = () => {
+    if (!flat.length) return;
+    const i = activeIndex === null ? 0 : Math.min(flat.length - 1, activeIndex + 1);
+    setActiveIndex(i);
+  };
+
+  return (
+    <section className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+      {/* TEXT */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70" htmlFor="opt-text">Your Text</label>
+        <textarea
+          id="opt-text"
+          className="h-24 w-full resize-y rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          value={text}
+          onChange={(e) => {
+            const v = e.target.value;
+            setText(v);
+            if (multicolor) {
+              const len = v.replace(/\n/g, "").length;
+              setPerLetter(Array.from({ length: len }, () => singleColor));
+            }
+          }}
+          placeholder={"Your\nText"}
+        />
+        <p className="mt-1 text-[11px] text-white/50">Use â†µ (Enter) for a new line.</p>
+      </div>
+
+      {/* FONTS */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Font</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+          {FONTS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setFontId(f.id)}
+              className={`rounded-lg border p-3 text-center transition
+                ${fontId === f.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+              style={{ fontFamily: `var(--font-${f.id}), var(--font-inter), system-ui, sans-serif` }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* SIZE */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Size</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {(Object.keys(SIZE_CATALOG) as SizeId[]).map((id) => {
+            const s = SIZE_CATALOG[id];
+            return (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setSizeId(id)}
+                className={`rounded-lg border p-3 text-left transition
+                  ${sizeId === id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+              >
+                <div className="text-sm">{s.label}</div>
+                <div className="text-[11px] text-white/60">{s.widthIn}" Ã— {s.heightIn}"</div>
+              </button>
+            );
+          })}
+        </div>
+        <p className="mt-1 text-[11px] text-white/50">Note: backboards can add ~1â€“1.6" to final length/height.</p>
+      </div>
+
+      {/* BACKBOARD */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Backboard</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {BACK_STYLES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setBackStyle(s.id)}
+              className={`rounded-lg border p-2 transition
+                ${p.backStyle === s.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+            >
+              <div className="mb-2 text-center text-[11px] text-white/70">{s.label}</div>
+              <div className="flex items-center justify-center">
+                <div
+                  className="h-10 w-16"
+                  style={{
+                    background: s.id === "cut-to-letter"
+                      ? "transparent"
+                      : BACK_COLORS.find((b) => b.id === p.backColor)?.fill || "rgba(255,255,255,0.04)",
+                    borderRadius:
+                      s.id === "rectangle" ? 8 :
+                      s.id === "rounded"   ? 16 :
+                      s.id === "circle"    ? "9999px" : 0,
+                    border: s.id === "cut-to-letter" ? "1px dashed rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.12)",
+                  }}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
+
+        <div className="mt-3">
+          <label className="mb-1 block text-xs text-white/70">Backboard Color</label>
+          <div className="grid grid-cols-4 gap-2">
+            {BACK_COLORS.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setBackColor(b.id)}
+                className={`rounded-lg border p-2 transition
+                  ${backColor === b.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+              >
+                <div className="mb-1 text-center text-[11px] text-white/70">{b.label}</div>
+                <div className="h-6 w-full rounded" style={{ background: b.fill }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* COLORS */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="block text-xs text-white/70">Color Mode</label>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input type="checkbox" checked={multicolor} onChange={(e) => handleToggleMulticolor(e.target.checked)} />
+            Multicolored
+          </label>
+        </div>
+
+        {/* Base color */}
+        <div className="rounded-lg border border-white/10 bg-black/40 p-3">
+          <div className="mb-2 text-xs text-white/70">Base Color</div>
+          <div className="flex flex-wrap items-center gap-2">
+            {PALETTE.map((hex) => (
+              <button
+                key={hex}
+                type="button"
+                onClick={() => handleBaseColorPick(hex)}
+                className="h-8 w-8 rounded-md border border-white/10"
+                style={{ background: hex, boxShadow: `0 0 10px ${hex}` }}
+                aria-label={`Base color ${hex}`}
+              />
+            ))}
+            <input
+              type="color"
+              value={singleColor}
+              onChange={(e) => handleBaseColorPick(e.target.value)}
+              className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
+              aria-label="Pick base color"
+            />
+            {multicolor && (
+              <button
+                type="button"
+                onClick={() => applyBaseToAll(singleColor)}
+                className="ml-2 rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
+              >
+                Apply to all letters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Per-letter */}
+        {multicolor && (
+          <div className="mt-3 rounded-lg border border-white/10 bg-black/40 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-xs text-white/70">
+                Selected letter:{" "}
+                {activeIndex !== null && activeIndex >= 0 && activeIndex < flat.length
+                  ? `${activeIndex + 1} (â€œ${flat[activeIndex]}â€)`
+                  : "None"}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={goPrev} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">â—€ Prev</button>
+                <button onClick={goNext} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Next â–¶</button>
+                <button onClick={() => setActiveIndex(null)} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Clear</button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {PALETTE.map((hex) => (
+                <button
+                  key={hex}
+                  type="button"
+                  onClick={() => setLetterColor(hex)}
+                  className="h-8 w-8 rounded-md border border-white/10"
+                  style={{ background: hex, boxShadow: `0 0 10px ${hex}` }}
+                  aria-label={`Set letter color ${hex}`}
+                />
+              ))}
+              <input
+                type="color"
+                onChange={(e) => setLetterColor(e.target.value)}
+                className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
+                aria-label="Pick letter color"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Preview.tsx
+C:\neontj\src\components\customizer\Preview.tsx
+/* src/components/customizer/Preview.tsx */
+"use client";
+
+import React, { useMemo } from "react";
+import type { FontId } from "@/lib/fonts";
+
+export type BackboardStyle = "cut-to-letter" | "rectangle" | "rounded" | "circle";
+export type BackboardColor = "clear" | "black" | "white" | "red";
+
+type Props = {
+  id?: string;
+  text: string;
+  fontId: FontId | string;
+  singleColor: string;
+  multicolor: boolean;
+  perLetter: string[];
+  backStyle: BackboardStyle;
+  backColor: BackboardColor;
+  onSelectIndex?: (i: number) => void;
+  activeIndex?: number | null;
+};
+
+const BACK_COLORS: Record<BackboardColor, string> = {
+  clear: "rgba(255,255,255,0.04)",
+  black: "rgba(0,0,0,0.96)",
+  white: "rgba(255,255,255,0.96)",
+  red:   "rgba(180,16,32,0.92)",
+};
+
+// cleaner glow (less blur = less â€œfuzzyâ€)
+const neonStack = (hex: string) =>
+  `0 0 1px ${hex}, 0 0 3px ${hex}, 0 0 6px ${hex}, 0 0 12px ${hex}`;
+
+export default function Preview({
+  id,
+  text,
+  fontId,
+  singleColor,
+  multicolor,
+  perLetter,
+  backStyle,
+  backColor,
+  onSelectIndex,
+  activeIndex = null,
+}: Props) {
+  // --- fixed SVG canvas (1000 x 600) ---
+  const vb = { w: 1000, h: 600 };
+
+  // text lines and flat string for index math
+  const lines = useMemo(() => text.split("\n"), [text]);
+  const flat = useMemo(() => text.replace(/\n/g, ""), [text]);
+  const maxLineLen = useMemo(() => Math.max(1, ...lines.map((l) => l.length || 1)), [lines]);
+
+  // font sizing heuristic inside the content box
+  // content box centered: 760 x 380
+  const box = { x: (vb.w - 760) / 2, y: (vb.h - 380) / 2, w: 760, h: 380 };
+  const fontPx = Math.max(40, Math.min(120, Math.floor(900 / maxLineLen)));
+  const lineHeight = Math.round(fontPx * 1.12);
+
+  // acrylic geometry (independent of text)
+  const board = (() => {
+    if (backStyle === "cut-to-letter") return null;
+    const fill = BACK_COLORS[backColor] || BACK_COLORS.clear;
+
+    if (backStyle === "circle") {
+      const r = 230; // fixed radius
+      return (
+        <circle
+          cx={vb.w / 2}
+          cy={vb.h / 2}
+          r={r}
+          fill={fill}
+          stroke="rgba(255,255,255,0.12)"
+          strokeWidth="1"
+        />
+      );
+    }
+
+    // rectangles
+    const w = 780;
+    const h = 360;
+    const rx = backStyle === "rounded" ? 22 : 8;
+    return (
+      <rect
+        x={(vb.w - w) / 2}
+        y={(vb.h - h) / 2}
+        width={w}
+        height={h}
+        rx={rx}
+        ry={rx}
+        fill={fill}
+        stroke="rgba(255,255,255,0.12)"
+        strokeWidth="1"
+      />
+    );
+  })();
+
+  // build HTML letter spans inside a foreignObject box so we keep
+  // your per-letter color + click behavior, while the FO scales with the SVG
+  let globalIndex = 0;
+  const renderedLines = lines.map((ln, li) => {
+    const chars = ln.split("").map((ch) => {
+      const i = globalIndex++;
+      const isSpace = ch === " ";
+      const color = multicolor ? (perLetter[i] || singleColor) : singleColor;
+      const active = activeIndex === i && !isSpace;
+
+      return (
+        <span
+          key={i}
+          onClick={() => !isSpace && onSelectIndex?.(i)}
+          style={{
+            color,
+            textShadow: neonStack(color),
+            outline: active ? `2px solid ${color}` : "none",
+            borderRadius: active ? 6 : 0,
+            boxShadow: active ? `0 0 8px ${color}` : "none",
+            padding: active ? "0 2px" : undefined,
+          }}
+          className={isSpace ? "inline-block w-[0.45em]" : "cursor-pointer select-none"}
+          aria-label={isSpace ? undefined : `Character ${ch}`}
+        >
+          {isSpace ? "\u00A0" : ch}
+        </span>
+      );
+    });
+
+    return (
+      <div key={`line-${li}`} className="leading-tight">
+        {chars}
+      </div>
+    );
+  });
+
+  return (
+    <div id={id} className="w-full">
+      <svg
+        viewBox={`0 0 ${vb.w} ${vb.h}`}
+        preserveAspectRatio="xMidYMid meet"
+        className="h-auto w-full rounded-2xl border border-white/10"
+      >
+        {/* background wall */}
+        <image
+          href="/images/rooms/dark-wall.jpg"
+          x="0"
+          y="0"
+          width={vb.w}
+          height={vb.h}
+          preserveAspectRatio="xMidYMid slice"
+        />
+        {/* subtle dark veil */}
+        <rect x="0" y="0" width={vb.w} height={vb.h} fill="rgba(0,0,0,0.35)" />
+
+        {/* acrylic */}
+        {board}
+
+        {/* text box */}
+        <foreignObject x={box.x} y={box.y} width={box.w} height={box.h}>
+          <div
+            xmlns="http://www.w3.org/1999/xhtml"
+            className="flex h-full w-full items-center justify-center text-center"
+            style={{
+              fontFamily: `var(--font-${fontId}), var(--font-inter), system-ui, sans-serif`,
+              fontSize: `${fontPx}px`,
+              lineHeight: `${lineHeight}px`,
+              WebkitTextStroke: "0.25px rgba(255,255,255,0.12)",
+            }}
+            data-font={fontId}
+          >
+            <div>{renderedLines}</div>
+          </div>
+        </foreignObject>
+
+        {/* selected badge (bottom-left) */}
+        {multicolor && activeIndex !== null && activeIndex >= 0 && activeIndex < flat.length && (
+          <foreignObject x="16" y={vb.h - 32} width="260" height="24">
+            <div
+              xmlns="http://www.w3.org/1999/xhtml"
+              className="rounded bg-black/70 px-2 py-0.5 text-[11px] text-white/90"
+            >
+              Selected: letter {activeIndex + 1} ({flat[activeIndex]})
+            </div>
+          </foreignObject>
+        )}
+      </svg>
+    </div>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+QuoteForm.tsx
+C:\neontj\src\components\customizer\QuoteForm.tsx
+/* src/components/customizer/QuoteForm.tsx */
+"use client";
+
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import * as htmlToImage from "html-to-image";
+
+export type DesignPayload = {
+  text: string;
+  fontId: string;
+  multicolor: boolean;
+  singleColor: string;
+  perLetter: string[];
+  sizeId: string;
+  backStyle: string;
+  backColor: string;
+};
+
+export default function QuoteForm({ payload, mode }: { payload: DesignPayload; mode: "text" | "logo" }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
+  const [sending, setSending] = useState(false);
+  const [ok, setOk] = useState<boolean | null>(null);
+  const [errMsg, setErrMsg] = useState<string>("");
+
+  const finalPrice = useMemo(() => {
+    const clean = payload.text.replace(/\s+/g, "");
+    const base = 200 + clean.length * 5;
+    return Math.max(205, Math.round(base / 5) * 5);
+  }, [payload.text]);
+
+  const validate = () => {
+    if (!name.trim()) return "Please enter your name.";
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return "Please enter a valid email.";
+    return "";
+  };
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
+    e.preventDefault();
+    const v = validate();
+    if (v) {
+      setErrMsg(v);
+      setOk(false);
+      return;
+    }
+
+    setSending(true);
+    setErrMsg("");
+    setOk(null);
+
+    // Optional mockup capture
+    let mockupDataUrl = "";
+    try {
+      const node = document.getElementById("sign-preview");
+      if (node) {
+        mockupDataUrl = await htmlToImage.toJpeg(node as HTMLElement, { quality: 0.8, canvasWidth: 480, pixelRatio: 1 });
+      }
+    } catch {}
+
+    try {
+      const res = await fetch("/api/quote", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: { name, email, phone, message },
+          design: payload,
+          meta: {
+            userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "",
+            page: typeof window !== "undefined" ? window.location.href : "",
+            estimate: finalPrice,
+            mockupDataUrl: mockupDataUrl || undefined,
+          },
+          company: "", // honeypot
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data?.ok) {
+        const reason = data?.error ? ` (${data.error})` : "";
+        throw new Error(`There was a problem sending your request${reason}. Please try again.`);
+      }
+      setOk(true);
+      setName("");
+      setEmail("");
+      setPhone("");
+      setMessage("");
+    } catch (err: any) {
+      setOk(false);
+      setErrMsg(err?.message || "Could not send your request.");
+    } finally {
+      setSending(false);
+    }
+  }, [name, email, phone, message, payload, finalPrice]);
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold tracking-wide text-white/80">Ready for a Quote?</h3>
+        <div className="text-xs text-white/60">Estimated price: ${finalPrice}</div>
+      </div>
+
+      <div>
+        <label htmlFor="q-name" className="mb-1 block text-xs text-white/70">Full name</label>
+        <input
+          id="q-name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          placeholder="You"
+          autoComplete="name"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="q-email" className="mb-1 block text-xs text-white/70">Email</label>
+        <input
+          id="q-email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="w-full rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          placeholder="you@example.com"
+          autoComplete="email"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="q-phone" className="mb-1 block text-xs text-white/70">Phone (optional)</label>
+        <input
+          id="q-phone"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          className="w-full rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          placeholder="(555) 555-5555"
+          autoComplete="tel"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="q-notes" className="mb-1 block text-xs text-white/70">Design notes (optional)</label>
+        <textarea
+          id="q-notes"
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          className="h-28 w-full resize-none rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          placeholder="Tell us where youâ€™ll hang it, deadlines, special requestsâ€¦"
+        />
+      </div>
+
+      {errMsg && <p className="text-sm text-rose-300">{errMsg}</p>}
+      {ok === true && <p className="text-sm text-emerald-300">Got it â€” weâ€™ll email you back shortly.</p>}
+
+      <button
+        type="submit"
+        disabled={sending}
+        className="w-full rounded-lg bg-gradient-to-r from-fuchsia-600 to-violet-600 px-4 py-3 font-semibold text-white shadow-[0_0_24px_rgba(155,92,255,.5)] disabled:cursor-not-allowed disabled:opacity-70"
+      >
+        {sending ? "Sendingâ€¦" : "Request Quote"}
+      </button>
+
+      <p className="text-[11px] text-white/50">
+        By submitting, you agree to be contacted about your quote. We never share your info.
+      </p>
+    </form>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Footer.tsx
+C:\neontj\src\components\layout\Footer.tsx
+/* src/components/layout/Footer.tsx */
+import Link from "next/link";
+
+export default function Footer() {
+  return (
+    <footer className="mt-16 border-t border-white/10">
+      <div className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-8 md:grid-cols-3">
+        <div className="text-white/80">
+          <div className="text-lg font-semibold">NeonTJ</div>
+          <p className="mt-2 text-sm text-white/60">Custom LED neon signs â€” fast quotes, designer help.</p>
+        </div>
+        <div className="text-sm">
+          <div className="mb-2 font-semibold text-white/80">Explore</div>
+          <ul className="space-y-1 text-white/70">
+            <li><Link href="/custom-sign" className="hover:text-white">Create Text Sign</Link></li>
+            <li><Link href="/submit-logo" className="hover:text-white">Submit Logo</Link></li>
+            <li><Link href="/portfolio" className="hover:text-white">Portfolio</Link></li>
+          </ul>
+        </div>
+        <div className="text-sm">
+          <div className="mb-2 font-semibold text-white/80">Legal</div>
+          <ul className="space-y-1 text-white/70">
+            <li><Link href="/privacy" className="hover:text-white">Privacy</Link></li>
+            <li><Link href="/terms" className="hover:text-white">Terms</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className="border-t border-white/10 py-4 text-center text-xs text-white/50">
+        Â© {new Date().getFullYear()} NeonTJ
+      </div>
+    </footer>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Header.tsx
+C:\neontj\src\components\layout\Header.tsx
+/* src/components/layout/Header.tsx */
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { clsx } from "clsx";
+
+const links = [
+  { href: "/", label: "Home" },
+  { href: "/custom-sign", label: "Create Text Sign" },
+  { href: "/submit-logo", label: "Submit Logo" },
+  { href: "/portfolio", label: "Portfolio" },
+];
+
+export default function Header() {
+  const pathname = usePathname();
+  return (
+    <header className="sticky top-0 z-40 border-b border-white/10 bg-black/70 backdrop-blur">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
+        <Link href="/" className="font-bold tracking-wide">
+          NeonTJ
+        </Link>
+        <nav className="flex gap-4 text-sm">
+          {links.map((l) => (
+            <Link
+              key={l.href}
+              href={l.href}
+              className={clsx(
+                "rounded px-3 py-1 transition",
+                pathname === l.href
+                  ? "bg-white/10 text-white"
+                  : "text-white/70 hover:text-white hover:bg-white/5"
+              )}
+              aria-current={pathname === l.href ? "page" : undefined}
+            >
+              {l.label}
+            </Link>
+          ))}
+        </nav>
+      </div>
+    </header>
+  );
+}
+
+--------------------------------------------------------------------------------
+
+Gallery.tsx
+C:\neontj\src\components\portfolio\Gallery.tsx
+'use client';
+import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+
+interface EnhancedSignImage {
+  id: number;
+  src: string;
+  alt: string;
+  blurDataURL: string;
+}
+
+interface GalleryProps {
+  initialImages: EnhancedSignImage[];
+}
+
+export default function Gallery({ initialImages }: GalleryProps) {
+  const [images] = useState<EnhancedSignImage[]>(initialImages);
+  const [visibleCount, setVisibleCount] = useState(12);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hoveredId, setHoveredId] = useState<number | null>(null);
+
+  const loadMoreImages = () => {
+    setIsLoading(true);
+    setTimeout(() => {
+      setVisibleCount(prev => Math.min(prev + 12, images.length));
+      setIsLoading(false);
+    }, 800);
+  };
+
+  // Generate structured data for SEO
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": images.slice(0, visibleCount).map((image, index) => ({
+      "@type": "ListItem",
+      "position": index + 1,
+      "item": {
+        "@type": "CreativeWork",
+        "name": image.alt,
+        "image": image.src,
+        "description": `Custom neon sign - ${image.alt}`
+      }
+    }))
+  };
+
+  return (
+    <main className="py-12 px-4 bg-bgBlack">
+      <script 
+        type="application/ld+json" 
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData) }}
+      />
+      
+      <div className="container mx-auto">
+        <div className="text-center mb-12">
+          <motion.h1
+            className="text-4xl md:text-6xl font-heading mb-4"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="neon-text">Our</span> Portfolio
+          </motion.h1>
+          <motion.p
+            className="text-xl text-neon-ice max-w-2xl mx-auto"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            Browse our collection of custom neon signs created for clients worldwide
+          </motion.p>
+        </div>
+
+        {/* Gallery Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {images.slice(0, visibleCount).map((image) => (
+            <motion.div
+              key={image.id}
+              className="relative group bg-bgBlack/50 border border-neon-purple/30 rounded-xl overflow-hidden"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4 }}
+              whileHover={{ y: -5 }}
+              onHoverStart={() => setHoveredId(image.id)}
+              onHoverEnd={() => setHoveredId(null)}
+            >
+              <div className="relative aspect-square overflow-hidden">
+                <Image
+                  src={image.src}
+                  alt={image.alt}
+                  fill
+                  className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  sizes="(max-width: 640px) 100vw, 
+                         (max-width: 1024px) 50vw, 
+                         33vw"
+                  placeholder="blur"
+                  blurDataURL={image.blurDataURL}
+                  priority={image.id < 5}
+                />
+                
+                <AnimatePresence>
+                  {hoveredId === image.id && (
+                    <motion.div
+                      className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-4"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <h3 className="text-white text-lg font-bold">
+                        {image.alt}
+                      </h3>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+
+        {/* Load More Button */}
+        {visibleCount < images.length && (
+          <div className="mt-12 text-center">
+            <motion.button
+              className="neon-button px-8 py-4 text-xl min-w-[200px]"
+              onClick={loadMoreImages}
+              disabled={isLoading}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              {isLoading ? (
+                <div className="flex items-center justify-center">
+                  <svg className="animate-spin h-5 w-5 mr-3 text-current" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+                  </svg>
+                  Loading...
+                </div>
+              ) : 'Load More'}
+            </motion.button>
+          </div>
+        )}
+
+        {/* CTA Section */}
+        <motion.div
+          className="mt-16 text-center"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <div className="mb-6">
+            <h2 className="text-3xl font-heading neon-text mb-4">
+              Ready to Create Your Own?
+            </h2>
+            <p className="text-xl text-neon-ice max-w-2xl mx-auto">
+              Design a custom neon sign that perfectly matches your style
+            </p>
+          </div>
+          
+          <Link href="/custom-sign">
+            <motion.button
+              className="neon-button px-8 py-4 text-xl"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              Design Your Custom Sign
+            </motion.button>
+          </Link>
+        </motion.div>
+      </div>
+    </main>
+  );
+}
+--------------------------------------------------------------------------------
+
+signs.ts
+C:\neontj\src\data\signs.ts
+export interface SignImage {
+  id: number;
+  src: string;
+  alt: string;
+  category?: string;
+}
+
+export const galleryImages: SignImage[] = [
+  { 
+    id: 1, 
+    src: "/images/portfolio/bar-sign.jpg", 
+    alt: "Custom Neon Bar Sign", 
+    category: "Business" 
+  },
+  { 
+    id: 2, 
+    src: "/images/portfolio/name-sign.jpg", 
+    alt: "Personalized Name Neon", 
+    category: "Personal" 
+  },
+  { 
+    id: 3, 
+    src: "/images/portfolio/restaurant-sign.jpg", 
+    alt: "LED Restaurant Sign", 
+    category: "Business" 
+  },
+  { 
+    id: 4, 
+    src: "/images/portfolio/home-decor.jpg", 
+    alt: "Home Decor Neon", 
+    category: "Home" 
+  },
+  { 
+    id: 5, 
+    src: "/images/portfolio/wedding-sign.jpg", 
+    alt: "Wedding Neon Art", 
+    category: "Events" 
+  },
+  { 
+    id: 6, 
+    src: "/images/portfolio/music-sign.jpg", 
+    alt: "Music Themed Sign", 
+    category: "Entertainment" 
+  },
+  { 
+    id: 7, 
+    src: "/images/portfolio/sports-sign.jpg", 
+    alt: "Sports Team Neon", 
+    category: "Sports" 
+  },
+  { 
+    id: 8, 
+    src: "/images/portfolio/quote-sign.jpg", 
+    alt: "Inspirational Quote Sign", 
+    category: "Home" 
+  },
+  { 
+    id: 9, 
+    src: "/images/portfolio/logo-design.jpg", 
+    alt: "Business Logo Design", 
+    category: "Business" 
+  },
+  { 
+    id: 10, 
+    src: "/images/portfolio/custom-shape.jpg", 
+    alt: "Custom Shape Neon", 
+    category: "Art" 
+  },
+  { 
+    id: 11, 
+    src: "/images/portfolio/event-sign.jpg", 
+    alt: "Special Event Sign", 
+    category: "Events" 
+  },
+  { 
+    id: 12, 
+    src: "/images/portfolio/large-wall.jpg", 
+    alt: "Large Wall Piece", 
+    category: "Commercial" 
+  },
+  { 
+    id: 13, 
+    src: "/images/portfolio/retro-sign.jpg", 
+    alt: "Retro Style Sign", 
+    category: "Vintage" 
+  },
+  { 
+    id: 14, 
+    src: "/images/portfolio/minimalist.jpg", 
+    alt: "Minimalist Design", 
+    category: "Home" 
+  },
+  { 
+    id: 15, 
+    src: "/images/portfolio/colorful-design.jpg", 
+    alt: "Colorful Neon Art", 
+    category: "Art" 
+  },
+  { 
+    id: 16, 
+    src: "/images/portfolio/outdoor-sign.jpg", 
+    alt: "Weatherproof Outdoor Sign", 
+    category: "Commercial" 
+  },
+];
+--------------------------------------------------------------------------------
+
+fonts.ts
+C:\neontj\src\lib\fonts.ts
+/* src/lib/fonts.ts */
+import localFont from "next/font/local";
+
+/** Masked IDs so real family names arenâ€™t exposed */
+export type FontId =
+  | "n1" | "n2" | "n3" | "n4" | "n5" | "n6" | "n7" | "n8"
+  | "n9" | "n10" | "n11" | "n12" | "n13" | "n14" | "n15" | "n16";
+
+/* Top-level consts (required by Next) â€” paths are relative to THIS file (src/lib) */
+const n1  = localFont({  src: "../fonts/Orbitron-Regular.ttf",            variable: "--font-n1",  display: "swap" });
+const n2  = localFont({  src: "../fonts/Monoton-Regular.ttf",             variable: "--font-n2",  display: "swap" });
+const n3  = localFont({  src: "../fonts/Pacifico-Regular.ttf",            variable: "--font-n3",  display: "swap" });
+const n4  = localFont({  src: "../fonts/Rajdhani-Regular.ttf",            variable: "--font-n4",  display: "swap" });
+const n5  = localFont({  src: "../fonts/AdventPro-Regular.ttf",           variable: "--font-n5",  display: "swap" });
+const n6  = localFont({  src: "../fonts/Astloch-Regular.ttf",             variable: "--font-n6",  display: "swap" });
+const n7  = localFont({  src: "../fonts/Atma-Regular.ttf",                variable: "--font-n7",  display: "swap" });
+const n8  = localFont({  src: "../fonts/Beon.otf",                        variable: "--font-n8",  display: "swap" });
+const n9  = localFont({  src: "../fonts/Borel-Regular.ttf",               variable: "--font-n9",  display: "swap" });
+const n10 = localFont({  src: "../fonts/Capriola-Regular.ttf",            variable: "--font-n10", display: "swap" });
+const n11 = localFont({  src: "../fonts/Charmonman-Regular.ttf",          variable: "--font-n11", display: "swap" });
+const n12 = localFont({  src: "../fonts/Gaegu-Regular.ttf",               variable: "--font-n12", display: "swap" });
+const n13 = localFont({  src: "../fonts/Grandstander-Regular.ttf",        variable: "--font-n13", display: "swap" });
+const n14 = localFont({  src: "../fonts/HachiMaruPop-Regular.ttf",        variable: "--font-n14", display: "swap" });
+const n15 = localFont({  src: "../fonts/MonomaniacOne-Regular.ttf",       variable: "--font-n15", display: "swap" });
+const n16 = localFont({  src: "../fonts/NightLightOutline.ttf",   variable: "--font-n16", display: "swap" });
+
+/** Attach all CSS variables to <html> */
+export const fontVarsClass = [
+  n1.variable, n2.variable, n3.variable, n4.variable, n5.variable, n6.variable,
+  n7.variable, n8.variable, n9.variable, n10.variable, n11.variable, n12.variable,
+  n13.variable, n14.variable, n15.variable, n16.variable,
+].join(" ");
+
+/** Masked labels for the picker (no real family names) */
+export const FONTS: { id: FontId; label: string }[] = [
+  { id: "n1",  label: "Neon Tech" },        // Orbitron
+  { id: "n2",  label: "Retro Tube" },       // Monoton
+  { id: "n3",  label: "Script Glow A" },    // Pacifico
+  { id: "n4",  label: "Condensed Glow" },   // Rajdhani
+  { id: "n5",  label: "Clean Sans A" },     // Advent Pro
+  { id: "n6",  label: "Quirky Thin" },      // Astloch
+  { id: "n7",  label: "Rounded Fun" },      // Atma
+  { id: "n8",  label: "Classic Neon" },     // Beon
+  { id: "n9",  label: "Casual Hand" },      // Borel
+  { id: "n10", label: "Simple Sans" },      // Capriola
+  { id: "n11", label: "Brush Script" },     // Charmonman
+  { id: "n12", label: "Playful Print" },    // Gaegu
+  { id: "n13", label: "Pop Thick" },        // Grandstander
+  { id: "n14", label: "Cute Script" },      // HachiMaruPop
+  { id: "n15", label: "Mono Line" },        // Monomaniac One
+  { id: "n16", label: "Outline Neon" },     // Night Light Outline
+];
+
+/** Helper: CSS var for inline style usage */
+export function cssVarForFont(id: string) {
+  return `var(--font-${id})`;
+}
+
+/** Optional: legacy id support */
+const LEGACY_TO_MASKED: Record<string, FontId> = {
+  orbitron: "n1", monoton: "n2", pacifico: "n3", rajdhani: "n4",
+  adventpro: "n5", astloch: "n6", atma: "n7", beon: "n8",
+  borel: "n9", capriola: "n10", charmonman: "n11", gaegu: "n12",
+  grandstander: "n13", hachikaku: "n14", monomaniac: "n15", nightlight: "n16",
+};
+export function normalizeFontId(id: string | undefined): FontId {
+  if (!id) return "n1";
+  return (LEGACY_TO_MASKED[id] as FontId) || (id as FontId);
+}
+
+--------------------------------------------------------------------------------
+
+gallery.ts
+C:\neontj\src\lib\gallery.ts
+// src/lib/gallery.ts
+
+interface SignImage {
+  id: number;
+  src: string;
+  alt: string;
+}
+
+export interface EnhancedSignImage extends SignImage {
+  blurDataURL: string;
+}
+
+// Use images present in public/images/gallery (update names if you add more)
+const galleryImages: SignImage[] = [
+  { id: 1, src: "/images/gallery/gallery1.jpg", alt: "Custom Neon Bar Sign" },
+  { id: 2, src: "/images/gallery/gallery2.jpg", alt: "Personalized Name Neon" },
+  { id: 3, src: "/images/gallery/gallery3.jpg", alt: "LED Restaurant Sign" },
+  { id: 4, src: "/images/gallery/gallery4.jpg", alt: "Home Decor Neon" },
+  { id: 5, src: "/images/gallery/gallery5.jpg", alt: "Wedding Neon Art" },
+  { id: 6, src: "/images/gallery/gallery6.jpg", alt: "Music Themed Sign" },
+  { id: 7, src: "/images/gallery/gallery7.jpg", alt: "Sports Team Neon" },
+  { id: 8, src: "/images/gallery/gallery8.jpg", alt: "Inspirational Quote Sign" },
+  { id: 9, src: "/images/gallery/gallery9.jpg", alt: "Business Logo Design" },
+  { id: 10, src: "/images/gallery/gallery10.jpg", alt: "Custom Shape Neon" },
+  { id: 11, src: "/images/gallery/gallery11.jpg", alt: "Special Event Sign" },
+];
+
+export function generateBlurDataURL(color: string = "#0D0D0D"): string {
+  return `data:image/svg+xml;base64,${Buffer.from(
+    `<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1" viewBox="0 0 1 1">
+      <rect width="1" height="1" fill="${color}" opacity="0.2"/>
+    </svg>`
+  ).toString("base64")}`;
+}
+
+export async function fetchGalleryImages(): Promise<EnhancedSignImage[]> {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(
+        galleryImages.map((img) => ({
+          ...img,
+          blurDataURL: generateBlurDataURL(),
+        }))
+      );
+    }, 300);
+  });
+}
+
+--------------------------------------------------------------------------------
+
+pricing.ts
+C:\neontj\src\lib\pricing.ts
+/* src/lib/pricing.ts */
+
+export type SizeId =
+  | "mini"
+  | "xs"
+  | "small"
+  | "medium"
+  | "large"
+  | "xl"
+  | "xxl"
+  | "supersized";
+
+export type BackboardStyle = "cut-to-letter" | "rectangle" | "rounded" | "circle";
+export type BackboardColor = "clear" | "black" | "white" | "smoke" | "ice";
+
+/** Use the style you showed: each size shows Length Ã— Height. Tune values as needed. */
+export const SIZE_CATALOG: Record<
+  SizeId,
+  { label: string; widthIn: number; heightIn: number }
+> = {
+  mini:       { label: "Mini",        widthIn: 16.5, heightIn: 8 },
+  xs:         { label: "Extra Small", widthIn: 20,   heightIn: 10 },
+  small:      { label: "Small",       widthIn: 24,   heightIn: 12 },
+  medium:     { label: "Medium",      widthIn: 30,   heightIn: 14 },
+  large:      { label: "Large",       widthIn: 38,   heightIn: 18 },
+  xl:         { label: "X Large",     widthIn: 48,   heightIn: 22 },
+  xxl:        { label: "XX Large",    widthIn: 64,   heightIn: 30 },
+  supersized: { label: "Supersized",  widthIn: 85,   heightIn: 38 },
+};
+
+/** pricing proxy â€” weâ€™ll refine once you approve the size grid */
+const RATE_PER_INCH = 5.8;
+const MATERIAL_FEE = 35;
+
+export function estimatePrice({
+  text, size, backboardStyle,
+}: {
+  text: string;
+  size: SizeId;
+  backboardStyle: BackboardStyle;
+}) {
+  const clean = (text || "").replace(/\s/g, "");
+  const charCount = Math.max(clean.length, 1);
+  const dims = SIZE_CATALOG[size];
+  const approxLedInches = dims.widthIn * 1.08 + charCount * 1.25;
+
+  let base = approxLedInches * RATE_PER_INCH + MATERIAL_FEE;
+
+  const styleMultiplier: Record<BackboardStyle, number> = {
+    "cut-to-letter": 1.0,
+    rectangle: 1.05,
+    rounded: 1.08,
+    circle: 1.1,
+  };
+  base *= styleMultiplier[backboardStyle];
+
+  return Math.max(205, Math.round(base / 5) * 5);
+}
+
+--------------------------------------------------------------------------------
+
+customizer.ts
+C:\neontj\src\types\customizer.ts
+export type BackboardStyle = "cut-to-letter" | "rectangle" | "rounded" | "circle";
+export type BackboardColor = "clear" | "black" | "white" | "smoke" | "ice";
+
+--------------------------------------------------------------------------------
+
+helpers.ts
+C:\neontj\src\utils\helpers.ts
+// Validation helpers
+export const validateEmail = (email: string): boolean => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return re.test(email);
+};
+
+// Formatting helpers
+export const formatDate = (date: Date): string => {
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric'
+  });
+};
+
+// Price formatting
+export const formatPrice = (price: number): string => {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: 2
+  }).format(price);
+};
+--------------------------------------------------------------------------------
+
+schemaGenerators.ts
+C:\neontj\src\utils\schemaGenerators.ts
+export function generateProductSchema(config: any) {
+  return JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Custom Neon Sign",
+    "image": config.imageUrl || "/default-neon.jpg",
+    "description": `Custom neon sign: ${config.line1}${config.line2 ? ` & ${config.line2}` : ''}`,
+    "brand": {
+      "@type": "Brand",
+      "name": "NEONTJ"
+    },
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "USD",
+      "price": config.price,
+      "availability": "https://schema.org/InStock",
+      "shippingDetails": {
+        "@type": "OfferShippingDetails",
+        "shippingRate": {
+          "@type": "MonetaryAmount",
+          "value": "0",
+          "currency": "USD"
+        },
+        "shippingDestination": {
+          "@type": "DefinedRegion",
+          "addressCountry": "US"
+        },
+        "deliveryTime": {
+          "@type": "ShippingDeliveryTime",
+          "handlingTime": {
+            "@type": "QuantitativeValue",
+            "minValue": "1",
+            "maxValue": "2"
+          },
+          "transitTime": {
+            "@type": "QuantitativeValue",
+            "minValue": "2",
+            "maxValue": "3"
+          }
+        }
+      }
+    }
+  });
+}
+--------------------------------------------------------------------------------
+
+validation.ts
+C:\neontj\src\utils\validation.ts
+import { z } from 'zod';
+
+export const SignConfigSchema = z.object({
+  line1: z.string()
+    .min(2, "Text must be at least 2 characters")
+    .max(20, "Text cannot exceed 20 characters")
+    .regex(/^[a-zA-Z0-9\s!?@#$%^&*()\-_=+[\]{}|;:'",.<>\/`~]+$/, "Invalid characters"),
+  line2: z.string().max(20, "Text cannot exceed 20 characters").optional(),
+  font: z.string().min(1, "Font is required"),
+  size: z.string().min(1, "Size is required"),
+  color: z.string().regex(/^#[0-9A-F]{6}$/i, "Invalid color format"),
+  backboardStyle: z.string().min(1, "Backboard style is required"),
+  backboardColor: z.string().min(1, "Backboard color is required"),
+  price: z.number().min(10, "Invalid price"),
+  email: z.string().email("Invalid email address").optional(),
+});
+
+export const validateConfig = (config: any) => {
+  try {
+    SignConfigSchema.parse(config);
+    return { valid: true, errors: null };
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      const errors = err.flatten().fieldErrors;
+      return { valid: false, errors };
+    }
+    return { valid: false, errors: { general: ["Validation failed"] } };
+  }
+};
+--------------------------------------------------------------------------------
+

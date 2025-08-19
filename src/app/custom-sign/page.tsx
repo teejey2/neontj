@@ -1,142 +1,132 @@
+/* src/app/custom-sign/page.tsx */
 "use client";
 
-import React, { useMemo, useState, useEffect } from "react";
-import { Preview } from "@/components/customizer/Preview";
-import { OptionsPanel } from "@/components/customizer/OptionsPanel";
-import QuoteForm, { type DesignPayload } from "@/components/customizer/QuoteForm";
+import React, { useMemo, useState } from "react";
+import Preview, {
+  type BackboardStyle,
+  type BackboardColor,
+} from "@/components/customizer/Preview";
+import OptionsPanel from "@/components/customizer/OptionsPanel";
+import QuoteForm from "@/components/customizer/QuoteForm";
+import { SIZE_CATALOG, type SizeId } from "@/lib/pricing";
 import type { FontId } from "@/lib/fonts";
-import type { SizeId, BackboardStyle, BackboardColor } from "@/lib/pricing";
+import { normalizeFontId } from "@/lib/fonts";
 
 export default function CustomSignPage() {
-  // ===== Builder state =====
+  // text
   const [text, setText] = useState<string>("Your\nText");
-  const [fontId, setFontId] = useState<FontId>("orbitron");
-  const [multicolor, setMulticolor] = useState(false);
-  const [singleColor, setSingleColor] = useState<string>("#B2FFF2");
-  const [sizeId, setSizeId] = useState<SizeId>("mini");
-  const [backStyle, setBackStyle] = useState<BackboardStyle>("cut-to-letter");
-  const [backColor, setBackColor] = useState<BackboardColor>("clear");
 
-  // per-letter colors
-  const flat = useMemo(() => text.replace(/\n/g, ""), [text]);
+  // fonts (masked ids)
+  const [fontId, setFontId] = useState<FontId>(normalizeFontId("n1"));
+
+  // colors
+  const [multicolor, setMulticolor] = useState<boolean>(false);
+  const [singleColor, setSingleColor] = useState<string>("#B2FFF2");
   const [perLetter, setPerLetter] = useState<string[]>([]);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
-  useEffect(() => {
-    if (perLetter.length !== flat.length) {
-      setPerLetter((prev) => {
-        const next = prev.slice(0, flat.length);
-        while (next.length < flat.length) next.push(singleColor);
-        return next;
-      });
-    }
-  }, [flat.length, singleColor, perLetter.length]);
+  // size
+  const [sizeId, setSizeId] = useState<SizeId>("mini");
 
-  const payload: DesignPayload = {
-    text,
-    fontId,
-    multicolor,
-    singleColor,
-    perLetter,
-    sizeId,
-    backStyle,
-    backColor,
-  };
+  // backboard
+  const [backStyle, setBackStyle] = useState<BackboardStyle>("cut-to-letter");
+  const [backColor, setBackColor] = useState<BackboardColor>("clear");
+
+  // keep per-letter array length in sync with text
+  const flat = useMemo(() => text.replace(/\n/g, ""), [text]);
+  React.useEffect(() => {
+    if (multicolor) {
+      setPerLetter((prev) => {
+        if (prev.length !== flat.length) {
+          return Array.from({ length: flat.length }, () => singleColor);
+        }
+        return prev;
+      });
+      if (activeIndex !== null && activeIndex >= flat.length) {
+        setActiveIndex(flat.length ? flat.length - 1 : null);
+      }
+    } else {
+      if (perLetter.length) setPerLetter([]);
+      setActiveIndex(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [flat.length, multicolor]);
+
+  // quick estimate (server/email still confirms final)
+  const estimate = (() => {
+    const s = SIZE_CATALOG[sizeId];
+    if (!s) return 0;
+    const chars = Math.max(flat.length, 1);
+    return Math.round((s.widthIn * 1.2 + chars * 1.5) * 1.8 + 25);
+  })();
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8">
-      {/* ========== MOBILE (sm) — fixed preview at top, spacer below ========== */}
-      <div className="md:hidden">
-        {/* Fixed preview bar */}
-        <div className="fixed inset-x-0 top-16 z-30 px-4">
-          <div className="mx-auto max-w-7xl">
-            <Preview
-              id="sign-preview"  // only exists on mobile right now
-              text={text}
-              fontId={fontId}
-              singleColor={singleColor}
-              multicolor={multicolor}
-              perLetter={perLetter}
-              onSelectIndex={(i) => setActiveIndex(i)}
-            />
-          </div>
-        </div>
-        {/* Spacer so content doesn’t sit under the fixed preview (adjust height to taste) */}
-        <div className="h-[360px]" />
-        {/* Options + Quote below */}
-        <div className="space-y-6">
-          <OptionsPanel
+    <main className="mx-auto grid max-w-7xl grid-cols-1 gap-6 px-4 py-10 md:grid-cols-12">
+      {/* LEFT: sticky preview */}
+      <div className="md:col-span-5">
+        <div className="sticky top-16 z-30 px-4">
+          <Preview
+            id="sign-preview"
             text={text}
-            setText={setText}
             fontId={fontId}
-            setFontId={setFontId}
-            multicolor={multicolor}
-            setMulticolor={(v) => {
-              setMulticolor(v);
-              if (!v) setActiveIndex(null);
-            }}
             singleColor={singleColor}
-            setSingleColor={setSingleColor}
-            activeIndex={activeIndex}
-            setActiveIndex={setActiveIndex}
+            multicolor={multicolor}
             perLetter={perLetter}
-            setPerLetter={setPerLetter}
-            sizeId={sizeId}
-            setSizeId={setSizeId}
             backStyle={backStyle}
-            setBackStyle={setBackStyle}
             backColor={backColor}
-            setBackColor={setBackColor}
+            activeIndex={activeIndex ?? null}
+            onSelectIndex={(i) => setActiveIndex(i)}
           />
-          <QuoteForm payload={payload} mode="text" />
+          <div className="mt-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-white/70">Estimated Price</span>
+              <span className="font-semibold">${estimate}</span>
+            </div>
+            <p className="mt-1 text-xs text-white/50">
+              Final price confirmed after design review.
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* ========== DESKTOP/TABLET (md+) — sticky left preview, scroll right options ========== */}
-      <div className="hidden md:grid md:grid-cols-12 md:gap-8">
-        {/* Left: sticky preview */}
-        <div className="md:col-span-7">
-          <div className="sticky top-24 self-start">
-            <Preview
-              id="sign-preview"  // only exists on desktop/tablet here
-              text={text}
-              fontId={fontId}
-              singleColor={singleColor}
-              multicolor={multicolor}
-              perLetter={perLetter}
-              onSelectIndex={(i) => setActiveIndex(i)}
-            />
-          </div>
-        </div>
+      {/* RIGHT: options + form */}
+      <div className="md:col-span-7">
+        <OptionsPanel
+          text={text}
+          setText={setText}
+          fontId={fontId}
+          setFontId={(v: string) => setFontId(v as FontId)}
+          multicolor={multicolor}
+          setMulticolor={setMulticolor}
+          singleColor={singleColor}
+          setSingleColor={setSingleColor}
+          activeIndex={activeIndex}
+          setActiveIndex={setActiveIndex}
+          perLetter={perLetter}
+          setPerLetter={setPerLetter}
+          sizeId={sizeId}
+          setSizeId={setSizeId}
+          backStyle={backStyle}
+          setBackStyle={setBackStyle}
+          backColor={backColor}
+          setBackColor={setBackColor}
+        />
 
-        {/* Right: scrollable options + form */}
-        <div className="md:col-span-5">
-          <div className="space-y-6">
-            <OptionsPanel
-              text={text}
-              setText={setText}
-              fontId={fontId}
-              setFontId={setFontId}
-              multicolor={multicolor}
-              setMulticolor={(v) => {
-                setMulticolor(v);
-                if (!v) setActiveIndex(null);
-              }}
-              singleColor={singleColor}
-              setSingleColor={setSingleColor}
-              activeIndex={activeIndex}
-              setActiveIndex={setActiveIndex}
-              perLetter={perLetter}
-              setPerLetter={setPerLetter}
-              sizeId={sizeId}
-              setSizeId={setSizeId}
-              backStyle={backStyle}
-              setBackStyle={setBackStyle}
-              backColor={backColor}
-              setBackColor={setBackColor}
-            />
-            <QuoteForm payload={payload} mode="text" />
-          </div>
+        {/* Quote form — expects { payload, mode } */}
+        <div className="mt-6">
+          <QuoteForm
+            payload={{
+              text,
+              fontId,
+              sizeId,
+              multicolor,
+              perLetter,
+              singleColor,
+              backStyle,
+              backColor,
+            }}
+            mode="text"
+          />
         </div>
       </div>
     </main>

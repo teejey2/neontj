@@ -18,9 +18,9 @@ module.exports = {
         },
       },
       fontFamily: {
-        // define a heading alias since code uses font-heading
-        heading: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
-        sans: ["var(--font-sans)", "ui-sans-serif", "system-ui"],
+        // Inter will be provided by next/font with a CSS variable
+        heading: ["var(--font-inter)", "ui-sans-serif", "system-ui"],
+        sans: ["var(--font-inter)", "ui-sans-serif", "system-ui"],
       },
       boxShadow: {
         // soft neon outer glow used as shadow-glow
@@ -32,4 +32,4 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};

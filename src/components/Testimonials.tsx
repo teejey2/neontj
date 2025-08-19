@@ -4,13 +4,13 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 const testimonials = [
-  { id: "t1", name: "Ashley M.", role: "Event Planner", avatar: "/assets/testimonials/ashley.jpg",
-    content: "The sign was absolutely stunning and made my event unforgettable. The colors popped perfectly!",
+  { id: "t1", name: "Ashley Event Services", role: "Owner", avatar: "/assets/testimonials/tktk.jpg",
+    content: "The signs are absolutely stunning and make my events unforgettable. My bookings have increased! People looovvvveeee the signs!",
     highlight: "stunning" },
-  { id: "t2", name: "Marcus T.", role: "Restaurant Owner", avatar: "/assets/testimonials/marcus.jpg",
+  { id: "t2", name: "DacSun.", role: "Restaurant Owner", avatar: "/assets/testimonials/tktk.jpg",
     content: "Customers keep asking where we got our neon sign. It's been a huge boost to our brand.",
     highlight: "huge boost" },
-  { id: "t3", name: "Brianna L.", role: "Wedding Coordinator", avatar: "/assets/testimonials/brianna.jpg",
+  { id: "t3", name: "Brianna L.", role: "Wedding Coordinator", avatar: "/assets/testimonials/tktk.jpg",
     content: "From start to finish, the process was seamless. The quality is unmatched.",
     highlight: "unmatched" },
 ];

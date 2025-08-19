@@ -1,177 +1,293 @@
+/* src/components/customizer/OptionsPanel.tsx */
 "use client";
 
-import React, { useMemo } from "react";
-import { fontOptions, type FontId } from "@/lib/fonts";
-import { ColorSwatch } from "./ColorSwatch";
-import {
-  SIZE_CATALOG,
-  type SizeId,
-  estimatePrice,
-  type BackboardStyle,
-  type BackboardColor,
-} from "@/lib/pricing";
-import { BackboardOptions } from "./BackboardOptions";
+import React from "react";
+import type { SizeId } from "@/lib/pricing";
+import { SIZE_CATALOG } from "@/lib/pricing";
+import { FONTS } from "@/lib/fonts";
+import type { BackboardStyle, BackboardColor } from "@/components/customizer/Preview";
 
-export type PanelProps = {
-  text: string;
-  setText: (v: string) => void;
-  fontId: FontId;
-  setFontId: (v: FontId) => void;
-  multicolor: boolean;
-  setMulticolor: (v: boolean) => void;
-  singleColor: string;
-  setSingleColor: (hex: string) => void;
-  activeIndex: number | null;
-  setActiveIndex: (i: number | null) => void;
-  perLetter: string[];
-  setPerLetter: (arr: string[]) => void;
-  sizeId: SizeId;
-  setSizeId: (v: SizeId) => void;
-  backStyle: BackboardStyle;
-  setBackStyle: (v: BackboardStyle) => void;
-  backColor: BackboardColor;
-  setBackColor: (v: BackboardColor) => void;
+const BACK_STYLES: { id: BackboardStyle; label: string }[] = [
+  { id: "cut-to-letter", label: "Cut to Letter" },
+  { id: "rectangle", label: "Rectangle" },
+  { id: "rounded", label: "Rounded Rectangle" },
+  { id: "circle", label: "Circle" },
+];
+
+const BACK_COLORS: { id: BackboardColor; label: string; fill: string }[] = [
+  { id: "clear", label: "Clear", fill: "rgba(255,255,255,0.04)" },
+  { id: "black", label: "Black", fill: "rgba(0,0,0,0.96)" },
+  { id: "white", label: "White", fill: "rgba(255,255,255,0.96)" },
+  { id: "red",   label: "Red",   fill: "rgba(180,16,32,0.92)" },
+];
+
+const PALETTE = [
+  "#FF4BD1", "#9B5CFF", "#3FD5FF", "#B2FFF2",
+  "#00FF8A", "#FFD400", "#FF7A00", "#FF2E2E",
+];
+
+type Props = {
+  text: string; setText: (v: string) => void;
+  fontId: string; setFontId: (v: string) => void;
+  multicolor: boolean; setMulticolor: (v: boolean) => void;
+  singleColor: string; setSingleColor: (v: string) => void;
+  activeIndex: number | null; setActiveIndex: (v: number | null) => void;
+  perLetter: string[]; setPerLetter: (v: string[]) => void;
+  sizeId: SizeId; setSizeId: (v: SizeId) => void;
+  backStyle: BackboardStyle; setBackStyle: (v: BackboardStyle) => void;
+  backColor: BackboardColor; setBackColor: (v: BackboardColor) => void;
 };
 
-/** Guard size to avoid crashes if an unknown key slips in */
-function getSafeSize(size: SizeId): SizeId {
-  const keys = Object.keys(SIZE_CATALOG) as SizeId[];
-  return (size && size in SIZE_CATALOG ? size : (keys[0] ?? ("m" as SizeId))) as SizeId;
-}
+export default function OptionsPanel(p: Props) {
+  const {
+    text, setText,
+    fontId, setFontId,
+    multicolor, setMulticolor,
+    singleColor, setSingleColor,
+    activeIndex, setActiveIndex,
+    perLetter, setPerLetter,
+    sizeId, setSizeId,
+    backStyle, setBackStyle,
+    backColor, setBackColor,
+  } = p;
 
-export function OptionsPanel(props: PanelProps) {
-  const safeSize = getSafeSize(props.sizeId);
+  const flat = text.replace(/\n/g, "");
+  const syncPerLetter = (seed: string) => Array.from({ length: flat.length }, () => seed);
 
-  // Memoized so typing doesn’t recompute price on every keystroke more than needed
-  const price = useMemo(
-    () =>
-      estimatePrice({
-        text: props.text,
-        size: safeSize,
-        multicolor: props.multicolor,
-        backboardStyle: props.backStyle,
-        backboardColor: props.backColor,
-      }),
-    [props.text, safeSize, props.multicolor, props.backStyle, props.backColor]
-  );
+  const applyBaseToAll = (hex: string) => setPerLetter(syncPerLetter(hex));
+
+  const setLetterColor = (hex: string) => {
+    if (activeIndex === null || activeIndex < 0 || activeIndex >= flat.length) return;
+    const next = perLetter.slice();
+    if (next.length !== flat.length) {
+      next.length = 0; next.push(...syncPerLetter(singleColor));
+    }
+    next[activeIndex] = hex;
+    setPerLetter(next);
+  };
+
+  const handleToggleMulticolor = (on: boolean) => {
+    setMulticolor(on);
+    if (on) setPerLetter(syncPerLetter(singleColor));
+    else setActiveIndex(null);
+  };
+
+  const handleBaseColorPick = (hex: string) => {
+    setSingleColor(hex);
+    if (multicolor) {
+      if (activeIndex === null) applyBaseToAll(hex);
+      else setLetterColor(hex);
+    }
+  };
+
+  const goPrev = () => {
+    if (!flat.length) return;
+    const i = activeIndex === null ? 0 : Math.max(0, activeIndex - 1);
+    setActiveIndex(i);
+  };
+
+  const goNext = () => {
+    if (!flat.length) return;
+    const i = activeIndex === null ? 0 : Math.min(flat.length - 1, activeIndex + 1);
+    setActiveIndex(i);
+  };
 
   return (
-    <div className="space-y-6">
-      {/* STEP 1 */}
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
-        <h3 className="mb-2 text-sm font-semibold tracking-wide text-white/80">1 ENTER YOUR TEXT</h3>
+    <section className="space-y-6 rounded-2xl border border-white/10 bg-white/5 p-4">
+      {/* TEXT */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70" htmlFor="opt-text">Your Text</label>
         <textarea
-          value={props.text}
-          onChange={(e) => props.setText(e.target.value)}
-          placeholder={"ENTER TEXT HERE\nPress Enter/Return for a new line"}
-          className="h-28 w-full resize-none rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40 focus:outline-none"
-          aria-label="Enter sign text"
-        />
-        <div className="mt-2 text-xs text-white/50">Max 3 lines recommended for best readability.</div>
-      </section>
-
-      {/* STEP 2 */}
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
-        <h3 className="mb-2 text-sm font-semibold tracking-wide text-white/80">2 CHOOSE FONT</h3>
-        <div className="relative">
-          <select
-            value={props.fontId}
-            onChange={(e) => props.setFontId(e.target.value as FontId)}
-            className="w-full appearance-none rounded-lg border border-white/10 bg-black/60 p-3 pr-10 text-white"
-            aria-label="Choose font"
-          >
-            {fontOptions.map((f) => (
-              <option key={f.id} value={f.id}>
-                {f.label}
-              </option>
-            ))}
-          </select>
-          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-white">▾</div>
-        </div>
-        <p className="mt-2 text-xs text-white/70">
-          Click &quot;Choose Font&quot; to pick your style.
-        </p>
-      </section>
-
-      {/* STEP 3 */}
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold tracking-wide text-white/80">3 CHOOSE COLOR</h3>
-          <label className="flex items-center gap-2 text-xs text-white/70">
-            <span>Multicolored</span>
-            <input
-              type="checkbox"
-              checked={props.multicolor}
-              onChange={(e) => props.setMulticolor(e.target.checked)}
-              className="h-5 w-10 cursor-pointer appearance-none rounded-full bg-white/20 outline-none transition-colors checked:bg-violet-500"
-              aria-label="Toggle multicolored"
-            />
-          </label>
-        </div>
-
-        <ColorSwatch
-          selected={props.singleColor}
-          onSelect={(hex) => {
-            if (props.multicolor && props.activeIndex !== null) {
-              const next = [...props.perLetter];
-              next[props.activeIndex] = hex;
-              props.setPerLetter(next);
-            } else {
-              props.setSingleColor(hex);
+          id="opt-text"
+          className="h-24 w-full resize-y rounded-lg border border-white/10 bg-black/60 p-3 text-white placeholder-white/40"
+          value={text}
+          onChange={(e) => {
+            const v = e.target.value;
+            setText(v);
+            if (multicolor) {
+              const len = v.replace(/\n/g, "").length;
+              setPerLetter(Array.from({ length: len }, () => singleColor));
             }
           }}
+          placeholder={"Your\nText"}
         />
+        <p className="mt-1 text-[11px] text-white/50">Use ↵ (Enter) for a new line.</p>
+      </div>
 
-        {props.multicolor && (
-          <div className="mt-2 text-xs text-white/60">
-            Click a letter in the preview, then pick a color to set that letter.
-          </div>
-        )}
-        <p className="mt-2 text-xs text-white/70">
-          Use &quot;Multicolor&quot; to color letters individually.
-        </p>
-      </section>
+      {/* FONTS */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Font</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-3">
+          {FONTS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              onClick={() => setFontId(f.id)}
+              className={`rounded-lg border p-3 text-center transition
+                ${fontId === f.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+              style={{ fontFamily: `var(--font-${f.id}), var(--font-inter), system-ui, sans-serif` }}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      {/* STEP 4 */}
-      <section className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow">
-        <h3 className="mb-3 text-sm font-semibold tracking-wide text-white/80">4 CHOOSE SIZE</h3>
-        <div className="grid grid-cols-2 gap-3">
+      {/* SIZE */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Size</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
           {(Object.keys(SIZE_CATALOG) as SizeId[]).map((id) => {
             const s = SIZE_CATALOG[id];
-            const isActive = safeSize === id;
             return (
               <button
                 key={id}
-                onClick={() => props.setSizeId(id)}
-                className={`rounded-xl border p-3 text-left ${
-                  isActive ? "border-violet-400 bg-violet-500/10" : "border-white/10 bg-black/50"
-                }`}
-                aria-pressed={isActive}
                 type="button"
+                onClick={() => setSizeId(id)}
+                className={`rounded-lg border p-3 text-left transition
+                  ${sizeId === id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
               >
-                <div className="text-sm font-semibold text-white">{s.label}</div>
-                <div className="text-xs text-white/60">Length: {s.widthIn}&quot;</div>
-                <div className="text-xs text-white/60">Height: {s.heightIn}&quot;</div>
+                <div className="text-sm">{s.label}</div>
+                <div className="text-[11px] text-white/60">{s.widthIn}" × {s.heightIn}"</div>
               </button>
             );
           })}
         </div>
-      </section>
+        <p className="mt-1 text-[11px] text-white/50">Note: backboards can add ~1–1.6" to final length/height.</p>
+      </div>
 
-      {/* STEP 5 — BACKBOARD */}
-      <BackboardOptions
-        backStyle={props.backStyle}
-        setBackStyle={props.setBackStyle}
-        backColor={props.backColor}
-        setBackColor={props.setBackColor}
-      />
+      {/* BACKBOARD */}
+      <div>
+        <label className="mb-1 block text-xs text-white/70">Backboard</label>
+        <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+          {BACK_STYLES.map((s) => (
+            <button
+              key={s.id}
+              type="button"
+              onClick={() => setBackStyle(s.id)}
+              className={`rounded-lg border p-2 transition
+                ${p.backStyle === s.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+            >
+              <div className="mb-2 text-center text-[11px] text-white/70">{s.label}</div>
+              <div className="flex items-center justify-center">
+                <div
+                  className="h-10 w-16"
+                  style={{
+                    background: s.id === "cut-to-letter"
+                      ? "transparent"
+                      : BACK_COLORS.find((b) => b.id === p.backColor)?.fill || "rgba(255,255,255,0.04)",
+                    borderRadius:
+                      s.id === "rectangle" ? 8 :
+                      s.id === "rounded"   ? 16 :
+                      s.id === "circle"    ? "9999px" : 0,
+                    border: s.id === "cut-to-letter" ? "1px dashed rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.12)",
+                  }}
+                />
+              </div>
+            </button>
+          ))}
+        </div>
 
-      {/* PRICE SUMMARY */}
-      <section className="rounded-2xl border border-white/10 bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 p-4">
-        <div className="mb-1 text-sm font-semibold tracking-wide text-white/80">Estimated Price</div>
-        <div className="text-2xl font-bold text-white">${price.finalPrice}</div>
-        <div className="mt-1 text-xs text-white/60">Final price confirmed after design review.</div>
-      </section>
-    </div>
+        <div className="mt-3">
+          <label className="mb-1 block text-xs text-white/70">Backboard Color</label>
+          <div className="grid grid-cols-4 gap-2">
+            {BACK_COLORS.map((b) => (
+              <button
+                key={b.id}
+                type="button"
+                onClick={() => setBackColor(b.id)}
+                className={`rounded-lg border p-2 transition
+                  ${backColor === b.id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
+              >
+                <div className="mb-1 text-center text-[11px] text-white/70">{b.label}</div>
+                <div className="h-6 w-full rounded" style={{ background: b.fill }} />
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* COLORS */}
+      <div>
+        <div className="mb-2 flex items-center justify-between">
+          <label className="block text-xs text-white/70">Color Mode</label>
+          <label className="flex items-center gap-2 text-xs text-white/70">
+            <input type="checkbox" checked={multicolor} onChange={(e) => handleToggleMulticolor(e.target.checked)} />
+            Multicolored
+          </label>
+        </div>
+
+        {/* Base color */}
+        <div className="rounded-lg border border-white/10 bg-black/40 p-3">
+          <div className="mb-2 text-xs text-white/70">Base Color</div>
+          <div className="flex flex-wrap items-center gap-2">
+            {PALETTE.map((hex) => (
+              <button
+                key={hex}
+                type="button"
+                onClick={() => handleBaseColorPick(hex)}
+                className="h-8 w-8 rounded-md border border-white/10"
+                style={{ background: hex, boxShadow: `0 0 10px ${hex}` }}
+                aria-label={`Base color ${hex}`}
+              />
+            ))}
+            <input
+              type="color"
+              value={singleColor}
+              onChange={(e) => handleBaseColorPick(e.target.value)}
+              className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
+              aria-label="Pick base color"
+            />
+            {multicolor && (
+              <button
+                type="button"
+                onClick={() => applyBaseToAll(singleColor)}
+                className="ml-2 rounded-lg border border-white/10 bg-white/10 px-3 py-1 text-xs hover:bg-white/20"
+              >
+                Apply to all letters
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Per-letter */}
+        {multicolor && (
+          <div className="mt-3 rounded-lg border border-white/10 bg-black/40 p-3">
+            <div className="mb-2 flex items-center justify-between">
+              <div className="text-xs text-white/70">
+                Selected letter:{" "}
+                {activeIndex !== null && activeIndex >= 0 && activeIndex < flat.length
+                  ? `${activeIndex + 1} (“${flat[activeIndex]}”)`
+                  : "None"}
+              </div>
+              <div className="flex gap-2">
+                <button onClick={goPrev} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">◀ Prev</button>
+                <button onClick={goNext} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Next ▶</button>
+                <button onClick={() => setActiveIndex(null)} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Clear</button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              {PALETTE.map((hex) => (
+                <button
+                  key={hex}
+                  type="button"
+                  onClick={() => setLetterColor(hex)}
+                  className="h-8 w-8 rounded-md border border-white/10"
+                  style={{ background: hex, boxShadow: `0 0 10px ${hex}` }}
+                  aria-label={`Set letter color ${hex}`}
+                />
+              ))}
+              <input
+                type="color"
+                onChange={(e) => setLetterColor(e.target.value)}
+                className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
+                aria-label="Pick letter color"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
