@@ -148,12 +148,12 @@ export default function OptionsPanel(p: Props) {
                   ${sizeId === id ? "border-white/70 bg-white/10" : "border-white/10 bg-black/40 hover:bg-white/5"}`}
               >
                 <div className="text-sm">{s.label}</div>
-                <div className="text-[11px] text-white/60">{s.widthIn}" × {s.heightIn}"</div>
+                <div className="text-[11px] text-white/60">{s.widthIn}″ × {s.heightIn}″</div>
               </button>
             );
           })}
         </div>
-        <p className="mt-1 text-[11px] text-white/50">Note: backboards can add ~1–1.6" to final length/height.</p>
+        <p className="mt-1 text-[11px] text-white/50">Note: backboards can add ~1–1.6″ to final length/height.</p>
       </div>
 
       {/* BACKBOARD */}
