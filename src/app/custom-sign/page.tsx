@@ -1,7 +1,7 @@
 /* src/app/custom-sign/page.tsx */
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import Preview, {
   type BackboardStyle,
   type BackboardColor,
@@ -13,9 +13,9 @@ import { normalizeFontId } from "@/lib/fonts";
 import type { SizeId } from "@/lib/pricing";
 
 /** Build a per-letter color array sized to the current text (no newlines). */
-function makePerLetterArray(text: string, color: string): string[] {
+function makePerLetterArray(text: string, seed: string): string[] {
   const clean = text.replace(/\n/g, "");
-  return Array.from({ length: clean.length }, () => color);
+  return Array.from({ length: clean.length }, () => seed);
 }
 
 export default function CustomSignPage() {
@@ -32,8 +32,24 @@ export default function CustomSignPage() {
   const [backStyle, setBackStyle] = useState<BackboardStyle>("cut-to-letter");
   const [backColor, setBackColor] = useState<BackboardColor>("clear");
 
-  // keep per-letter colors aligned to text length
-  const perLetter = useMemo(() => makePerLetterArray(text, singleColor), [text, singleColor]);
+  // NEW: per-letter is real state (so letter color edits persist)
+  const [perLetter, setPerLetter] = useState<string[]>(
+    () => makePerLetterArray(text, singleColor)
+  );
+
+  // Keep per-letter array length in sync with text changes (preserve existing colors)
+  useEffect(() => {
+    const flatLen = text.replace(/\n/g, "").length;
+    setPerLetter((prev) => {
+      const next = Array.from({ length: flatLen }, (_, i) => prev?.[i] ?? singleColor);
+      return next;
+    });
+    // Keep activeIndex in-bounds when text changes
+    setActiveIndex((idx) => {
+      if (idx === null) return idx;
+      return idx >= flatLen ? (flatLen ? flatLen - 1 : null) : idx;
+    });
+  }, [text, singleColor]);
 
   // simple estimate (placeholder — server email still includes estimate)
   const estimate = useMemo(() => {
@@ -79,8 +95,7 @@ export default function CustomSignPage() {
           />
         </div>
       </div>
-      {/* Spacer so content isn’t hidden behind the fixed preview on mobile.
-          Aspect ~1000x600 → about 60% height of width. */}
+      {/* Spacer so content isn’t hidden behind the fixed preview on mobile. */}
       <div className="md:hidden" aria-hidden>
         <div className="pb-[60%]" />
       </div>
@@ -89,7 +104,6 @@ export default function CustomSignPage() {
       <div className="grid grid-cols-1 gap-6 md:grid-cols-12">
         {/* LEFT: STICKY PREVIEW (only md+) */}
         <div className="relative hidden md:col-span-5 md:block">
-          {/* Make the preview stick inside this column */}
           <div className="sticky top-24">
             <Preview
               id="sign-preview-desktop"
@@ -113,28 +127,26 @@ export default function CustomSignPage() {
             text={text}
             setText={(v) => {
               setText(v);
-              // keep active index safe when text changes
-              setActiveIndex((idx) => {
-                const len = v.replace(/\n/g, "").length;
-                return idx !== null && idx >= len ? len - 1 : idx;
-              });
             }}
             /* font (OptionsPanel expects (v: string) => void) */
             fontId={fontId}
             setFontId={(v: string) => setFontId(normalizeFontId(v))}
             /* color */
             multicolor={multicolor}
-            setMulticolor={(v: boolean) => {
-              setMulticolor(v);
-              if (!v) setActiveIndex(null);
+            setMulticolor={(on: boolean) => {
+              setMulticolor(on);
+              if (on) {
+                // initialize per-letter to base when enabling multicolor
+                const flatLen = text.replace(/\n/g, "").length;
+                setPerLetter(Array.from({ length: flatLen }, () => singleColor));
+              } else {
+                setActiveIndex(null);
+              }
             }}
             singleColor={singleColor}
             setSingleColor={(c: string) => setSingleColor(c)}
             perLetter={perLetter}
-            setPerLetter={(_arr: string[]) => {
-              // If you later want OptionsPanel to push a per-letter array, wire it here.
-              // For now we derive perLetter from (text, singleColor) to avoid drift.
-            }}
+            setPerLetter={setPerLetter}
             activeIndex={activeIndex}
             setActiveIndex={setActiveIndex}
             /* size (expects SizeId) */
