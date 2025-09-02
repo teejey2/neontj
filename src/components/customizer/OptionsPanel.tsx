@@ -58,10 +58,7 @@ export default function OptionsPanel(p: Props) {
 
   const setLetterColor = (hex: string) => {
     if (activeIndex === null || activeIndex < 0 || activeIndex >= flat.length) return;
-    const next = perLetter.slice();
-    if (next.length !== flat.length) {
-      next.length = 0; next.push(...syncPerLetter(singleColor));
-    }
+    const next = perLetter.length === flat.length ? perLetter.slice() : syncPerLetter(singleColor);
     next[activeIndex] = hex;
     setPerLetter(next);
   };
@@ -231,13 +228,7 @@ export default function OptionsPanel(p: Props) {
                 aria-label={`Base color ${hex}`}
               />
             ))}
-            <input
-              type="color"
-              value={singleColor}
-              onChange={(e) => handleBaseColorPick(e.target.value)}
-              className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
-              aria-label="Pick base color"
-            />
+            {/* Custom color input removed by request */}
             {multicolor && (
               <button
                 type="button"
@@ -250,7 +241,7 @@ export default function OptionsPanel(p: Props) {
           </div>
         </div>
 
-        {/* Per-letter */}
+        {/* Per-letter (palette only) */}
         {multicolor && (
           <div className="mt-3 rounded-lg border border-white/10 bg-black/40 p-3">
             <div className="mb-2 flex items-center justify-between">
@@ -261,8 +252,8 @@ export default function OptionsPanel(p: Props) {
                   : "None"}
               </div>
               <div className="flex gap-2">
-                <button onClick={goPrev} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">◀ Prev</button>
-                <button onClick={goNext} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Next ▶</button>
+                <button onClick={goPrev} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">◀︎ Prev</button>
+                <button onClick={goNext} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Next ▶︎</button>
                 <button onClick={() => setActiveIndex(null)} className="rounded border border-white/10 bg-white/10 px-2 py-1 text-xs hover:bg-white/20">Clear</button>
               </div>
             </div>
@@ -278,12 +269,7 @@ export default function OptionsPanel(p: Props) {
                   aria-label={`Set letter color ${hex}`}
                 />
               ))}
-              <input
-                type="color"
-                onChange={(e) => setLetterColor(e.target.value)}
-                className="h-8 w-10 cursor-pointer rounded-md border border-white/10 bg-black/60 p-0"
-                aria-label="Pick letter color"
-              />
+              {/* Custom color input removed by request */}
             </div>
           </div>
         )}
